@@ -1,4 +1,5 @@
 from os import name, stat_result
+from unicodedata import category
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from init import db
@@ -32,15 +33,16 @@ class Product(db.Model):
     __tablename__ = 'product'
 
     product_id = db.Column(db.Integer, primary_key = True)
-    product_name = db.Column(db.String(64))
-    category_value = db.Column(db.Integer)
+    category_id = db.Column(db.Integer,db.ForeignKey("category.category_id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
+    product_name = db.Column(db.String(256))
     price = db.Column(db.Float)
     # number is about to be included
     photo_path = db.Column(db.String(100))
-    description = db.Column(db.String(500))
     # add source id
-    source_id = db.Column(db.Integer)
-    availability_state = db.Column(db.Integer)
+    state = db.Column(db.Boolean)
+    put_timestamp = db.Column(db.DateTime)
+    product_description = db.Column(db.String(256))
 
 
     __table_args__ = {
@@ -71,12 +73,14 @@ class User(db.Model):
    # __bind_key__ = 'user_0'
     __tablename__ = 'user'
 
-    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, primary_key = True)
     user_name = db.Column(db.String(64))
     password = db.Column(db.String(50))
+    account = db.Column(db.Float)
+    identity = db.Column(db.Boolean)
     # add email
     email = db.Column(db.String(100))
-    WeChat_id = db.Column(db.String(100))
+    other_contact_info = db.Column(db.String(100))
 
     __table_args__ = {
         "mysql_charset" : "utf8"
@@ -108,34 +112,33 @@ class History(db.Model):
    # __bind_key__ = 'history_0'
     __tablename__ = 'history'
 
-    id = db.Column(db.Integer, primary_key = True)
-    user_provider_id = db.Column(db.Integer)
-    user_purchaser_id = db.Column(db.Integer)
-    product_id = db.Column(db.Integer)
-    user_perspective = db.Column(db.Integer)
-    day = db.Column(db.Date)
-    category_value = db.Column(db.Integer)
-    time = db.Column(db.String(100))
-    product_name = db.Column(db.String(64))
-    price = db.Column(db.Float)
-    description = db.Column(db.String(500))
-    source_id = db.Column(db.Integer)
-    availability_state = db.Column(db.Integer)
+    user_provider_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key = True)
+    user_purchaser_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key = True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.product_id"), primary_key = True)
+    timestamp = db.Column(db.DateTime)
 
     __table_args__ = {
         "mysql_charset": "utf8"
     }
 
-class Category_info(db.Model):
-    __tablename__ = 'category_info'
+class Category(db.Model):
+    __tablename__ = 'category'
 
-    id = db.Column(db.Integer, primary_key = True)
-    category_n = db.Column(db.String(60))
+    category_id = db.Column(db.Integer, primary_key = True)
+    category_name = db.Column(db.String(60))
     __table_args__ = {
         "mysql_charset" : "utf8"
     }
 
-#
+class Favorites(db.Model):
+    __tablename__ = 'favorites'
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), primary_key = True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.product_id"), primary_key = True)
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
+
 # class Role(db.Model):
 #     __tablename__ = 'roles'
 #     id = db.Column(db.Integer, primary_key=True)
@@ -164,26 +167,31 @@ if __name__ == '__main__':
     db.drop_all()
     db.create_all()#创建新表
 
-    user1 = User(id = 1, user_name = 'software engineering kills 01', password = '123456', email='1@163.com')
-    user2 = User(id = 2, user_name = 'why ask2', password = '123', email='2@gmail.com')
-    user3 = User(id=3, user_name='test_2', password = '111', email='Just_a_string')
-    userx=User(id=9, user_name='test_3', password='test', email='string', WeChat_id='userx_wechat')
-    product1 = Product(product_id = 1, product_name='x0', price = 100.1, description='没人理解计算机系统', category_value=1)
-    product2 = Product(product_id = 2, product_name='x1', price = 50.1, description='操统话剧排练', category_value=1)
-    product3 = Product(product_id=3, product_name='x2', price=70.1, description='软件工程教材', category_value=1, source_id = 1)
-    product4 = Product(product_id=4, product_name='x3', price=100000, description='信科大三本科生', category_value=2, source_id = 1)
-    product5 = Product(product_id=5, product_name='x4', price=100010, description='信科大三一只猫', category_value=2, source_id = 2)
+    user1 = User(user_id = 1, user_name = 'software engineering kills 01', password = '123456', email='1@163.com', account = 0, identity = False)
+    user2 = User(user_id = 2, user_name = 'why ask2', password = '123', email='2@gmail.com', account = 1000, identity = False )
+    user3 = User(user_id = 3, user_name = 'test_2', password = '111', email='Just_a_string', account = 100.15, identity = False)
 
-    product6 = Product(product_id=6, product_name='淑芬1', price=10.1, description='我就没学会过', category_value=1, source_id=3)
-    product7 = Product(product_id=7, product_name='淑芬2', price=13.1, description='我就没学会过+1', category_value=1, source_id=3)
-    product12 = Product(product_id=16, product_name='我和我的祖国', price=11.1, description='思修论文写作指导', category_value=1, source_id=9, availability_state=1)
+    category1 = Category(category_id = 1, category_name = "test1")
+    category2 = Category(category_id = 2, category_name = "test2")
+    # userx=User(user_id = 9, user_name = 'test_3', password='test', email='string', WeChat_id='userx_wechat')
+    product1 = Product(product_id = 1, product_name='x0', price = 100.1, product_description='没人理解计算机系统', category_id=1, user_id = 2, state = True)
+    product2 = Product(product_id = 2, product_name='x1', price = 50.1, product_description='操统话剧排练', category_id=1, user_id = 3, state = True)
+    product3 = Product(product_id=3, product_name='x2', price=70.1, product_description='软件工程教材', category_id=1, user_id = 1, state = True)
+    product4 = Product(product_id=4, product_name='x3', price=100000, product_description='信科大三本科生', category_id=2, user_id = 1, state = True)
+    product5 = Product(product_id=5, product_name='x4', price=100010, product_description='信科大三一只猫', category_id=2, user_id = 2, state = True)
+
+    product6 = Product(product_id=6, product_name='淑芬1', price=10.1, product_description='我就没学会过', category_id=2, user_id=3, state = True)
+    product7 = Product(product_id=7, product_name='淑芬2', price=13.1, product_description='我就没学会过+1', category_id=1, user_id=3, state = True)
+    product12 = Product(product_id=16, product_name='我和我的祖国', price=11.1, product_description='思修论文写作指导', category_id=1, user_id=2, state = True)
     #db.session.add_all([user1, user2, product1, product2])
     #db.session.add_all([product6, product7, product8])
-    history_0=History(user_purchaser_id=1, user_provider_id=2, product_id=1)
-    db.session.add_all([user1, user2, user3, product3, product4, product5, product6, product7, history_0])
-    db.session.add_all([user1, product1, product2])
-    db.session.add(product12)
-    db.session.add(userx)
+    # history_0=History(user_purchaser_id=1, user_provider_id=2, product_id=1)
+    db.session.add_all([user1, user2, user3])
+    db.session.add_all([category1, category2])
+    db.session.commit()
+    db.session.add_all([product1, product2, product3, product4, product5, product6, product7, product12])
+    # db.session.add(product12)
+    # db.session.add(userx)
     db.session.commit()
     wanted1 = Wanted(wanted_id = 1, wanted_name="April", price = 100.1, description="信科小姐姐", category_value=1)
     wanted2 = Wanted(wanted_id = 2, wanted_name="嘉然", price = 10, description="!!!!!! ", category_value=2)
@@ -195,14 +203,14 @@ if __name__ == '__main__':
     db.session.commit()
     # product1 = Product(id = 1, name = '数分三', price = 10.111, description = '好书一本哦，大家注意！！！')
     # product2 = Product(id = 2, name = 'test', price = 12334, description = 'test！！！')
-    #
-    correlation1 = Correlation(user_id = 1, product_id = 2, state = 0)
-    correlation2 = Correlation(user_id = 2, product_id = 1, state = 4)
-    #
-    # #在将对象写入数据库之前，先将其添加到会话中，数据库会话db.session和Flask session对象没有关系，数据库会话也称 事物 译作Database Transaction。
-    db.session.add_all([correlation1, correlation2])
+    # #
+    # correlation1 = Correlation(user_id = 1, product_id = 2, state = 0)
+    # correlation2 = Correlation(user_id = 2, product_id = 1, state = 4)
+    # #
+    # # #在将对象写入数据库之前，先将其添加到会话中，数据库会话db.session和Flask session对象没有关系，数据库会话也称 事物 译作Database Transaction。
+    # db.session.add_all([correlation1, correlation2])
     # #提交会话到数据库
-    db.session.commit()
+    # db.session.commit()
     #
     # #修改roles名
     # user1.name = '刘雨薇yuweil'
