@@ -57,7 +57,7 @@ def take_id(x):
 
 # user_post_product
 # post: post a product
-@app.route('/userpostproduct', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/user_post_product', methods=['GET', 'POST', 'OPTIONS'])
 def user_post_product():
     print("enter_user_post_product")
     info = json.loads(request.get_data())
@@ -108,7 +108,7 @@ def user_post_product():
 # post: post a wanted
 # need check: photo functions added
 # no use for this function
-@app.route('/userpostwanted', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/user_post_wanted', methods=['GET', 'POST', 'OPTIONS'])
 def user_post_wanted():
     info = json.loads(request.get_data())
     # directly return
@@ -137,7 +137,7 @@ def user_post_wanted():
 
 # user_search_products
 # post: show all products that have something in search
-@app.route('/usersearchproducts', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/user_search_products', methods=['GET', 'POST', 'OPTIONS'])
 def user_search_products():
     info = json.loads(request.get_data())
     # directly return
@@ -236,7 +236,7 @@ def user_search_products():
 
 # user_all_products
 # post: show all products that have been posted by one specific user
-@app.route('/userallproducts', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/user_all_products', methods = ['GET', 'POST', 'OPTIONS'])
 def user_all_products():
     info = json.loads(request.get_data())
     # directly return
@@ -422,7 +422,7 @@ def user_modify_product():
 
 # delete_product
 # post: delete the target product
-@app.route('/deleteproduct', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/delete_product', methods=['GET', 'POST', 'OPTIONS'])
 def delete_product():
     info = json.loads(request.get_data())
     if request.method == 'GET':
@@ -550,7 +550,7 @@ def wanted_info():
 
 # product_info
 # post: show the details of the product
-@app.route('/productinfo', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/product_info', methods=['GET', 'POST', 'OPTIONS'])
 def product_info():
     info = json.loads(request.get_data())
 
@@ -603,10 +603,10 @@ def product_info():
         return
 
 
-# log_in
+# login
 # post: log in and send the status
 @app.route('/login', methods=['GET', 'POST', 'OPTIONS'])
-def log_in():
+def login():
     info = json.loads(request.get_data())
 
     if request.method == 'GET':
@@ -648,10 +648,10 @@ def log_in():
         return
 
 
-# register_x
+# register
 # post: register a new account
 @app.route('/register', methods=['GET', 'POST', 'OPTIONS'])
-def register_x():
+def register():
     info = json.loads(request.get_data())
 
     if request.method == 'GET':
@@ -722,7 +722,7 @@ def change_WeChat():
 # post: buy a certain product and set its state
 # implemented by lexie, 2021.12.14
 # TODO(scarlyw): check transaction
-@app.route('/buyproduct', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/buy_product', methods=['GET', 'POST', 'OPTIONS'])
 def buy_product():
     info = json.loads(request.get_data())
 
@@ -868,7 +868,7 @@ def change_contact_info():
 
 # add_favorite
 # post: add a product to the favorite folder
-@app.route('/addfavorite', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/add_favorite', methods=['GET', 'POST', 'OPTIONS'])
 def add_favorite():
     info = json.loads(request.get_data())
     if request.method == 'GET':
@@ -907,7 +907,7 @@ def add_favorite():
 
 # my_favorites
 # post: get all products that are favored
-@app.route('/myfavorites', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/my_favorites', methods=['GET', 'POST', 'OPTIONS'])
 def my_favorites():
     info = json.loads(request.get_data())
     if request.method == 'GET':
@@ -967,7 +967,7 @@ def my_favorites():
 
 # delete_favorites
 # post: delete a certain product from the favorites folder
-@app.route('/deletefavorites', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/delete_favorites', methods=['GET', 'POST', 'OPTIONS'])
 def delete_favorites():
     info = json.loads(request.get_data())
     if request.method == 'GET':
@@ -999,7 +999,7 @@ def delete_favorites():
 
 # my_purchase
 # post: get all products that have been purchased in the history table
-@app.route('/mypurchase', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/my_purchase', methods=['GET', 'POST', 'OPTIONS'])
 def my_purchase():
     info = json.loads(request.get_data())
     if request.method == 'GET':
@@ -1057,7 +1057,7 @@ def my_purchase():
 
 # my_sold
 # post: get all products that have been sold by this user
-@app.route('/mysold', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/my_sold', methods=['GET', 'POST', 'OPTIONS'])
 def my_sold():
     info = json.loads(request.get_data())
     if request.method == 'GET':
