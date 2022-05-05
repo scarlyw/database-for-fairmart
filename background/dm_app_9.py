@@ -249,20 +249,14 @@ def user_all_products():
     # search the posted items from a specific user
     elif request.method == 'POST':
         # strategy_first = 0, all products
+        if (info["user_id"] == 0):
+            return 
         if info["strategy_0"] == 0:
-            if info["source_id"] != 0:
-                search_result = Product.query.filter(Product.user_id == info["user_id"]).all()
-            else:
-                search_result = Product.query.filter(Product.state == True).all()
-
+            search_result = Product.query.filter(Product.user_id == info["user_id"]).all()
         # only want one category
-        elif info["strategy_0"] == 1:
-            if info["source_id"] != 0:
-                search_result = Product.query.filter(and_(Product.user_id == info["user_id"],
+        else :           
+            search_result = Product.query.filter(and_(Product.user_id == info["user_id"],
                                                           Product.category_id == info["category_id"])).all()
-            else:
-                search_result = Product.uery.filter(and_(Product.category_id == info["category_id"],
-                                                         Product.state == True)).all()
 
         # different sorting strategies
         # automatically present the product by id
