@@ -28,8 +28,6 @@ app.config['SECRET_KEY'] = 'hard to guess'  # 一个字符串，密码。也可�
 # The default database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:200021lwr@127.0.0.1:3306/test_0'
 
-# automatically update the database
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db.init_app(app)
@@ -59,7 +57,6 @@ def take_id(x):
 
 # user_post_product
 # post: post a product
-# implemented by lexie, 2021.11.23
 @app.route('/userpostproduct', methods=['GET', 'POST', 'OPTIONS'])
 def user_post_product():
     print("enter_user_post_product")
@@ -239,7 +236,6 @@ def user_search_products():
 
 # user_all_products
 # post: show all products that have been posted by one specific user
-# implemented by lexie, 2021.11.24
 @app.route('/userallproducts', methods=['GET', 'POST', 'OPTIONS'])
 def user_all_products():
     info = json.loads(request.get_data())
@@ -249,20 +245,14 @@ def user_all_products():
     # search the posted items from a specific user
     elif request.method == 'POST':
         # strategy_first = 0, all products
+        if (info["user_id"] == 0):
+            return 
         if info["strategy_0"] == 0:
-            if info["source_id"] != 0:
-                search_result = Product.query.filter(Product.user_id == info["user_id"]).all()
-            else:
-                search_result = Product.query.filter(Product.state == True).all()
-
+            search_result = Product.query.filter(Product.user_id == info["user_id"]).all()
         # only want one category
-        elif info["strategy_0"] == 1:
-            if info["source_id"] != 0:
-                search_result = Product.query.filter(and_(Product.user_id == info["user_id"],
+        else :           
+            search_result = Product.query.filter(and_(Product.user_id == info["user_id"],
                                                           Product.category_id == info["category_id"])).all()
-            else:
-                search_result = Product.uery.filter(and_(Product.category_id == info["category_id"],
-                                                         Product.state == True)).all()
 
         # different sorting strategies
         # automatically present the product by id
@@ -430,10 +420,8 @@ def user_modify_product():
         return
 
 
-# delete_produt
+# delete_product
 # post: delete the target product
-# implemented by lexie, 2021.11.23
-# modified by lexie, 2021.12.21
 @app.route('/deleteproduct', methods=['GET', 'POST', 'OPTIONS'])
 def delete_product():
     info = json.loads(request.get_data())
@@ -442,15 +430,24 @@ def delete_product():
         return
 
     elif request.method == 'POST':
+        product_cnt = db.session.query(Product).filter(Product.product_id == info["product_id"]).count()
+        if product_cnt == 0:
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "wrong id for product"
+            res = make_response(json.dumps(user_dict))
+            res.headers["Access-Control-Allow-Origin"] = '*'
+            return res
+        
         product_x = db.session.query(Product).filter(Product.product_id == info["product_id"]).first()
         # product_x.source_id = 0
         print("change successful")
         db.session.delete(product_x)
         db.session.commit()
-        user_dict = to_dict(product_x)
         db.session.close()
-        print(user_dict)
-        user_dict["result"] = "success"
+        user_dict = {}
+        user_dict["state"] = True
+        user_dict["result"] = "delete successfully"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -553,8 +550,6 @@ def wanted_info():
 
 # product_info
 # post: show the details of the product
-# implemented by lexie, 2021.11.23
-# consult Cai for further improvements
 @app.route('/productinfo', methods=['GET', 'POST', 'OPTIONS'])
 def product_info():
     info = json.loads(request.get_data())
@@ -569,6 +564,15 @@ def product_info():
         # search products based on the posted id
         # the result is a list
         # notice: use first as the search condition
+        product_cnt = Product.query.filter(Product.product_id == info["product_id"]).count()
+        if (product_cnt == 0):
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "Wrong product id"
+            res = make_response(json.dumps(user_dict))
+            res.headers["Access-Control-Allow-Origin"] = '*'
+            return res
+        
         dict_result = to_dict((Product.query.filter(Product.product_id == info["product_id"])).first())
         basedir = os.path.abspath(os.path.dirname(__file__))
         # print(basedir)
@@ -601,9 +605,6 @@ def product_info():
 
 # log_in
 # post: log in and send the status
-# implemented by lexie, 2021.11.23
-# updated by lexie, 2021.12.8
-# need test: log in logic has been changed
 @app.route('/login', methods=['GET', 'POST', 'OPTIONS'])
 def log_in():
     info = json.loads(request.get_data())
@@ -618,6 +619,7 @@ def log_in():
         if user_cnt == 0:
             # need modification
             result = {}
+            result["state"] = False
             result["result"] = "failed: user name does not exist"
             res = make_response(json.dumps(result))
             res.headers["Accesss-Control-Allow-Origin"] = '*'
@@ -627,13 +629,15 @@ def log_in():
 
         # check the log in status
         if info["password"] != user_search["password"]:
-            user_search["result"] = "failed"
+            user_search["state"] = False
+            user_search["result"] = "failed: wrong user name or password"
             res = make_response(json.dumps(user_search))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
 
         # correctly log in
-        user_search["result"] = "success"
+        user_search["state"] = True
+        user_search["result"] = "log in successfully!"
         res = make_response(json.dumps(user_search))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -646,8 +650,6 @@ def log_in():
 
 # register_x
 # post: register a new account
-# implemented by lexie, 2021.11.23
-# clear
 @app.route('/register', methods=['GET', 'POST', 'OPTIONS'])
 def register_x():
     info = json.loads(request.get_data())
@@ -660,21 +662,22 @@ def register_x():
     elif request.method == 'POST':
         user_cnt = User.query.filter(User.email == info["email"]).count()
         if user_cnt != 0:
-            user_x = User(email = info["email"])
-            user_dict = to_dict(user_x)
-            user_dict["result"] = "failed"
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "Repeated registration!"
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
 
         # create a new user account
-        user_x = User(user_name=info["user_name"], password=info["password"], account = 0, identity = False, email = info["email"])
+        user_x = User(user_name = info["user_name"], password = info["password"], account = 0, identity = False, email = info["email"])
         db.session.add(user_x)
         db.session.commit()
-        # response to the front
-        user_dict = to_dict(user_x)
         db.session.close()
-        user_dict["result"] = "success"
+        # response to the front
+        user_dict = {}
+        user_dict["state"] = True
+        user_dict["result"] = "succeed in registration!"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -718,7 +721,7 @@ def change_WeChat():
 # buy_product
 # post: buy a certain product and set its state
 # implemented by lexie, 2021.12.14
-# TODO(scarlyw): add transaction
+# TODO(scarlyw): check transaction
 @app.route('/buyproduct', methods=['GET', 'POST', 'OPTIONS'])
 def buy_product():
     info = json.loads(request.get_data())
@@ -729,60 +732,65 @@ def buy_product():
 
     # register
     elif request.method == 'POST':
-        product_x = db.session.query(Product).filter(Product.product_id == info["sold_product_id"]).first()
-        if product_x.availability_state == 2:
-            user_dict = to_dict(product_x)
-            user_dict["result"] = "failed"
+        product_x = db.session.query(Product).filter(Product.product_id == info["product_id"]).first()
+        buyer = db.session.query(User).filter(User.user_id == info["user_id"]).first()
+        seller = db.session.query(User).filter(User.user_id == product_x.user_id).first()
+        if product_x.state == False:
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "This product has been sold"
+            res = make_response(json.dumps(user_dict))
+            res.headers["Access-Control-Allow-Origin"] = '*'
+            return res
+        elif buyer.account < product_x.price:
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "You don't have enough money"
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
 
-        history_x = History(user_provider_id=product_x.source_id,
-                            user_purchaser_id=info["buyer_id"],
-                            product_id=info["sold_product_id"],
-                            category_value=product_x.category_value,
-                            product_name=product_x.product_name,
-                            price=product_x.price,
-                            description=product_x.description,
-                            source_id=product_x.source_id,
-                            availability_state=2,
-                            time=info["time"])
+        history_x = History(user_provider_id = product_x.user_id,
+                            user_purchaser_id = info["user_id"],
+                            product_id = info["product_id"],
+                            timestamp = datetime.now)
 
-        db.session.add(history_x)
-        # db.session.commit()
+        buyer.account -= product_x.price
+        seller.account += product_x.price
+        product_x.state = False
 
-        product_x.availability_state = 2
-        db.session.add(product_x)
+        db.session.add_all([buyer, seller, product_x, history_x])
         db.session.commit()
+        db.session.close()
+        # db.session.close()
 
-        seller = User.query.filter(User.id == history_x.user_provider_id).first()
-        buyer = User.query.filter(User.id == history_x.user_purchaser_id).first()
+        # seller = User.query.filter(User.id == history_x.user_provider_id).first()
+        # buyer = User.query.filter(User.id == history_x.user_purchaser_id).first()
         
-        sender = 'from@fairmart.com'
-        receivers = seller.email  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+        # sender = 'from@fairmart.com'
+        # receivers = seller.email  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
         
-        content = "Dear user:\n" + "Your product " + product_x.product_name + " has been purchased by " + buyer.user_name + ",\n" + "Please contact the buyer via wechat or email,\n"  + "buyer wechat: " + buyer.WeChat_id + ", buyer email: " + buyer.email + "\n"
+        # content = "Dear user:\n" + "Your product " + product_x.product_name + " has been purchased by " + buyer.user_name + ",\n" + "Please contact the buyer via wechat or email,\n"  + "buyer wechat: " + buyer.WeChat_id + ", buyer email: " + buyer.email + "\n"
 
-        message = MIMEText(content, 'plain', 'utf-8')
+        # message = MIMEText(content, 'plain', 'utf-8')
 
-        message['From'] = Header("Fairmart", 'utf-8')   # 发送者
-        message['To'] =  Header(seller.user_name, 'utf-8')        # 接收者
+        # message['From'] = Header("Fairmart", 'utf-8')   # 发送者
+        # message['To'] =  Header(seller.user_name, 'utf-8')        # 接收者
  
-        subject = 'Fairmart message'
-        message['Subject'] = Header(subject, 'utf-8')
+        # subject = 'Fairmart message'
+        # message['Subject'] = Header(subject, 'utf-8')
 
-        try:
-            smtpObj = smtplib.SMTP('localhost')
-            smtpObj.sendmail(sender, receivers, message.as_string())
-            print ("邮件发送成功")
-        except smtplib.SMTPException:
-            print ("Error: 无法发送邮件")
+        # try:
+        #     smtpObj = smtplib.SMTP('localhost')
+        #     smtpObj.sendmail(sender, receivers, message.as_string())
+        #     print ("邮件发送成功")
+        # except smtplib.SMTPException:
+        #     print ("Error: 无法发送邮件")
 
         # response to the front
-        user_dict = to_dict(history_x)
-        user_dict["result"] = "success"
-        user_dict["seller_wechat"] = seller.WeChat_id
-        db.session.close()
+        user_dict = {}
+        user_dict["state"] = True
+        user_dict["result"] = "You buy it successfully"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -821,6 +829,8 @@ def reset_pw():
         print("reset password options error!")
         return
 
+# change_contact_info
+# post: change the other_contact_info
 @app.route('/change_contact_info', methods=['GET', 'POST', 'OPTIONS'])
 def change_contact_info():
     info = json.loads(request.get_data())
@@ -829,13 +839,23 @@ def change_contact_info():
         return
     # register
     elif request.method == 'POST':
+        user_cnt = db.session.query(User).filter(User.user_id == info["user_id"]).count()
+        if (user_cnt == 0):
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "Please log in first"
+            res = make_response(json.dumps(user_dict))
+            res.headers["Access-Control-Allow-Origin"] = '*'
+            return res
+
         user_x = db.session.query(User).filter(User.user_id == info["user_id"]).first()
         user_x.other_contact_info = info["other_contact_info"]
         db.session.add(user_x)
         db.session.commit()
-        user_dict = to_dict(user_x)
         db.session.close()
-        user_dict["result"] = "success"
+        user_dict = {}
+        user_dict["state"] = True
+        user_dict["result"] = "change information successfully"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -871,9 +891,10 @@ def add_favorite():
         db.session.add(favorite_x)
         db.session.commit()
         # response to the front
-        user_dict = to_dict(favorite_x)
         db.session.close()
-        user_dict["result"] = "success"
+        user_dict = {}
+        user_dict["state"] = True
+        user_dict["result"] = "Mark successfully"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -899,13 +920,13 @@ def my_favorites():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = list(db.session.execite('select * from product where category_id = %d and product_id in \
+            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
                                                      select favorites.product_id from favorites where user_id = %d' 
-                                                     % info["category_id"], info["user_id"]))
+                                                     % info["category_id"], info["user_id"])
         else:
-            search_result = list(db.session.execite('select * from product where product_id in \
+            search_result = db.session.execite('select * from product where product_id in \
                                                      select favorites.product_id from favorites where user_id = %d' 
-                                                     % info["user_id"]))
+                                                     % info["user_id"])
 
         # different sorting strategies
         # automatically present the product by id
@@ -954,13 +975,18 @@ def delete_favorites():
         return
 
     elif request.method == 'POST':
+        favorite_cnt = Favorites.query.filter(and_(Favorites.user_id == info["user_id"],
+                                                 Favorites.product_id == info["product_id"])).count()
+        if (favorite_cnt == 0):
+            return 
         favorite_x = Favorites.query.filter(and_(Favorites.user_id == info["user_id"],
                                                  Favorites.product_id == info["product_id"])).all()
         user_dict = to_dict(favorite_x)
         db.session.delete(favorite_x)
         db.session.commit()
         db.session.close()
-        user_dict["result"] = "success"
+        user_dict["state"] = True
+        user_dict["result"] = "delete successfully"
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
         return res
@@ -985,13 +1011,13 @@ def my_purchase():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = list(db.session.execite('select * from product where category_id = %d and product_id in \
+            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
                                                      select history.product_id from history where user_purchaser_id = %d' 
-                                                     % info["category_id"], info["user_id"]))
+                                                     % info["category_id"], info["user_id"])
         else:
-            search_result = list(db.session.execite('select * from product where product_id in \
+            search_result = db.session.execite('select * from product where product_id in \
                                                      select history.product_id from history where user_purchaser_id = %d' 
-                                                     % info["user_id"]))
+                                                     % info["user_id"])
 
         # different sorting strategies
         # automatically present the product by id
@@ -1029,6 +1055,8 @@ def my_purchase():
         print("product options error!")
         return
 
+# my_sold
+# post: get all products that have been sold by this user
 @app.route('/mysold', methods=['GET', 'POST', 'OPTIONS'])
 def my_sold():
     info = json.loads(request.get_data())
@@ -1041,13 +1069,13 @@ def my_sold():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = list(db.session.execite('select * from product where category_id = %d and product_id in \
+            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
                                                      select history.product_id from history where user_provider_id = %d' 
-                                                     % info["category_id"], info["user_id"]))
+                                                     % info["category_id"], info["user_id"])
         else:
-            search_result = list(db.session.execite('select * from product where product_id in \
+            search_result = db.session.execite('select * from product where product_id in \
                                                      select history.product_id from history where user_provider_id = %d' 
-                                                     % info["user_id"]))
+                                                     % info["user_id"])
 
         # different sorting strategies
         # automatically present the product by id
@@ -1085,32 +1113,57 @@ def my_sold():
         print("product options error!")
         return
 
-
+# get_seller_info
+# post: get the information of the seller of this product
 @app.route('/get_seller_info', methods=['GET', 'POST', 'OPTIONS'])
 def get_seller_info():
+    if request.method == 'GET' or request.method == 'OPTIONS':
+        return
+
     info = json.loads(request.get_data())
-    product_x = Product.query.filter(Product.product_id == info["product_id"]).count()
+    # TODO(scarlyw): 确认是否需要考虑商品错误
+    product_x = Product.query.filter(Product.product_id == info["product_id"]).first()
     user_x = User.query.filter(User.user_id == product_x.user_id).first()
     user_dict = {}
     user_dict["email"] = user_x.email
     user_dict["other_connect_description"] = user_x.other_contact_info
-    user_dict["result"] = "success"
     res = make_response(json.dumps(user_dict))
     res.headers["Access-Control-Allow-Origin"] = '*'
     return res
 
+# get_user_info
+# post: get the information of the user
 @app.route('/get_user_info', methods=['GET', 'POST', 'OPTIONS'])
 def get_user_info():
+    if request.method == 'GET' or request.method == 'OPTIONS':
+        return
+
     info = json.loads(request.get_data())
+    user_cnt = User.query.filter(User.user_id == info["user_id"]).count()
+    if (user_cnt == 0):
+        user_dict = {}
+        user_dict["state"] = False
+        user_dict["result"] = "please log in first"
+        res = make_response(json.dumps(user_dict))
+        res.headers["Access-Control-Allow-Origin"] = '*'
+        return res
+
     user_x = User.query.filter(User.user_id == info["user_id"]).first()
     user_dict = to_dict(user_x)
+    user_dict.pop("password")
+    user_dict["state"] = True
     user_dict["result"] = "success"
     res = make_response(json.dumps(user_dict))
     res.headers["Access-Control-Allow-Origin"] = '*'
     return res
 
+# get_favorite_state
+# post: get the state of this marked product
 @app.route('/get_favorite_state', methods=['GET', 'POST', 'OPTIONS'])
 def get_favorite_state():
+    if request.method == 'GET' or request.method == 'OPTIONS':
+        return
+
     info = json.loads(request.get_data())
     favorite_cnt = Favorites.query.filter(and_(Favorites.product_id == info["product_id"],
                                                Favorites.user_id == info["user_id"])).count()
@@ -1120,23 +1173,52 @@ def get_favorite_state():
     res.headers["Access-Control-Allow-Origin"] = '*'
     return res
 
+# deposit
+# post: user deposit the money
 @app.route('/deposit', methods=['GET', 'POST', 'OPTIONS'])
 def deposit():
+    if request.method == 'GET' or request.method == 'OPTIONS':
+        return
+
     info = json.loads(request.get_data())
+    user_cnt = db.session.query(User).filter(User.user_id == info["user_id"]).count()
+    if (user_cnt == 0):
+        user_dict = {}
+        user_dict["state"] = False
+        user_dict["result"] = "Please log in first"
+        res = make_response(json.dumps(user_dict))
+        res.headers["Access-Control-Allow-Origin"] = '*'
+        return res
+
     user_x = db.session.query(User).filter(User.user_id == info["user_id"]).first()
     user_x.account += info["money"]
     db.session.add(user_x)
     db.session.commit()
     db.session.close()
     user_dict = {}
-    user_dict["state"] = "successful"
+    user_dict["state"] = True
+    user_dict["result"] = "deposit successfully"
     res = make_response(json.dumps(user_dict))
     res.headers["Access-Control-Allow-Origin"] = '*'
     return res
 
+# get_user_state
+# post: get the identity of the user
 @app.route('/get_user_state', methods=['GET', 'POST', 'OPTIONS'])
 def get_user_state():
+    if request.method == 'GET' or request.method == 'OPTIONS':
+        return
+
     info = json.loads(request.get_data())
+    user_cnt = db.session.query(User).filter(User.user_id == info["user_id"]).count()
+    if (user_cnt == 0):
+        user_dict = {}
+        user_dict["state"] = False
+        user_dict["result"] = "Please log in first"
+        res = make_response(json.dumps(user_dict))
+        res.headers["Access-Control-Allow-Origin"] = '*'
+        return res
+
     user_x = User.query.filter(User.user_id == info["user_id"]).first()
     user_dict = {}
     user_dict["state"] = user_x.identity
