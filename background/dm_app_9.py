@@ -23,7 +23,7 @@ app.config['SECRET_KEY'] = 'hard to guess'  # 一个字符串，密码。也可�
 
 # connect with the mysql database
 # The default database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1z2x3c@127.0.0.1:3306/test_0'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:200021lwr@127.0.0.1:3306/test_0'
 
 # automatically update the database
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
