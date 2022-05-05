@@ -718,7 +718,7 @@ def change_WeChat():
 # buy_product
 # post: buy a certain product and set its state
 # implemented by lexie, 2021.12.14
-# TODO(scarlyw): add transaction
+# TODO(scarlyw): check transaction
 @app.route('/buyproduct', methods=['GET', 'POST', 'OPTIONS'])
 def buy_product():
     info = json.loads(request.get_data())
@@ -729,59 +729,56 @@ def buy_product():
 
     # register
     elif request.method == 'POST':
-        product_x = db.session.query(Product).filter(Product.product_id == info["sold_product_id"]).first()
-        if product_x.availability_state == 2:
+        product_x = db.session.query(Product).filter(Product.product_id == info["product_id"]).first()
+        buyer = db.session.query(User).filter(User.user_id == info["user_id"]).first()
+        seller = db.session.query(User).filter(User.user_id == product_x.user_id).first()
+        if product_x.state == False or buyer.account < product_x.price:
             user_dict = to_dict(product_x)
             user_dict["result"] = "failed"
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
+        
+        history_x = History(user_provider_id = product_x.user_id,
+                            user_purchaser_id = info["user_id"],
+                            product_id = info["product_id"],
+                            timestamp = datetime.now)
 
-        history_x = History(user_provider_id=product_x.source_id,
-                            user_purchaser_id=info["buyer_id"],
-                            product_id=info["sold_product_id"],
-                            category_value=product_x.category_value,
-                            product_name=product_x.product_name,
-                            price=product_x.price,
-                            description=product_x.description,
-                            source_id=product_x.source_id,
-                            availability_state=2,
-                            time=info["time"])
+        buyer.account -= product_x.price
+        seller.account += product_x.price
+        product_x.state = False
 
-        db.session.add(history_x)
-        # db.session.commit()
-
-        product_x.availability_state = 2
-        db.session.add(product_x)
+        db.session.add_all([buyer, seller, product_x, history_x])
         db.session.commit()
+        # db.session.close()
 
-        seller = User.query.filter(User.id == history_x.user_provider_id).first()
-        buyer = User.query.filter(User.id == history_x.user_purchaser_id).first()
+        # seller = User.query.filter(User.id == history_x.user_provider_id).first()
+        # buyer = User.query.filter(User.id == history_x.user_purchaser_id).first()
         
-        sender = 'from@fairmart.com'
-        receivers = seller.email  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+        # sender = 'from@fairmart.com'
+        # receivers = seller.email  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
         
-        content = "Dear user:\n" + "Your product " + product_x.product_name + " has been purchased by " + buyer.user_name + ",\n" + "Please contact the buyer via wechat or email,\n"  + "buyer wechat: " + buyer.WeChat_id + ", buyer email: " + buyer.email + "\n"
+        # content = "Dear user:\n" + "Your product " + product_x.product_name + " has been purchased by " + buyer.user_name + ",\n" + "Please contact the buyer via wechat or email,\n"  + "buyer wechat: " + buyer.WeChat_id + ", buyer email: " + buyer.email + "\n"
 
-        message = MIMEText(content, 'plain', 'utf-8')
+        # message = MIMEText(content, 'plain', 'utf-8')
 
-        message['From'] = Header("Fairmart", 'utf-8')   # 发送者
-        message['To'] =  Header(seller.user_name, 'utf-8')        # 接收者
+        # message['From'] = Header("Fairmart", 'utf-8')   # 发送者
+        # message['To'] =  Header(seller.user_name, 'utf-8')        # 接收者
  
-        subject = 'Fairmart message'
-        message['Subject'] = Header(subject, 'utf-8')
+        # subject = 'Fairmart message'
+        # message['Subject'] = Header(subject, 'utf-8')
 
-        try:
-            smtpObj = smtplib.SMTP('localhost')
-            smtpObj.sendmail(sender, receivers, message.as_string())
-            print ("邮件发送成功")
-        except smtplib.SMTPException:
-            print ("Error: 无法发送邮件")
+        # try:
+        #     smtpObj = smtplib.SMTP('localhost')
+        #     smtpObj.sendmail(sender, receivers, message.as_string())
+        #     print ("邮件发送成功")
+        # except smtplib.SMTPException:
+        #     print ("Error: 无法发送邮件")
 
         # response to the front
         user_dict = to_dict(history_x)
         user_dict["result"] = "success"
-        user_dict["seller_wechat"] = seller.WeChat_id
+        user_dict["seller_wechat"] = seller.email
         db.session.close()
         res = make_response(json.dumps(user_dict))
         res.headers["Access-Control-Allow-Origin"] = '*'
