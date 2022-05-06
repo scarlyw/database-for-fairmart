@@ -32,7 +32,7 @@ export default {
   name: "App",
   components: {
     myHeader: Header,
-    // myLeftSidebar: LeftSidebar,
+    myLeftSidebar: LeftSidebar,
     myDisplay: DisplaySix,
     myInformation: information,
   },

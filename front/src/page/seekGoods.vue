@@ -76,7 +76,7 @@ export default {
     initialize() {
       this.description = "not a book";
       const that = this;
-      const path = "http://10.2.35.12:8080/userallwanted";
+      const path = "http://localhost:8081/userallwanted";
       var getGoods = {
         strategy_0: 0,
         strategy_1: 0,
@@ -87,11 +87,6 @@ export default {
         that.goods = response.data;
         console.log(that.goods);
       });
-      /*
-     this.goods=[{product_name:"嘉然小姐",description:"急需一只嘉然小姐，价格面议，嘉然，你带我走吧",price:"20"},
-     {product_name:"亭亭April",description:"重金征求信科xjj教我学编译"},
-     {product_name:"陈睿",description:"重金悬赏叔叔"}]
-     */
     },
     debug() {
       console("I'm here");

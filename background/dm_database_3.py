@@ -3,14 +3,15 @@ from unicodedata import category
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from init import db
+import hashlib
 
 app = Flask(__name__)
-#
+
 '''配置数据库'''
 app.config['SECRET_KEY'] = 'hard to guess'#一个字符串，密码。也可以是其他如加密过的
 
 #在此登录的是root用户，要填上密码如123456，MySQL默认端口是3306。并填上创建的数据库名如youcaihua
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1z2x3c@127.0.0.1:3306/test_0'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost:3306/test_0'
 
 #SQLALCHEMY_BINDS = {
  #   'product_0': 'mysql+pymysql://root:123456@127.0.0.1:3306/test_product_0',
@@ -166,10 +167,27 @@ if __name__ == '__main__':
     #删除旧表
     db.drop_all()
     db.create_all()#创建新表
+    m = hashlib.md5()
+    password_1 = "123456"
+    password_1 = password_1.encode(encoding="utf-8")
+    m.update(password_1)
+    password_1 = m.hexdigest()
 
-    user1 = User(user_id = 1, user_name = 'software engineering kills 01', password = '123456', email='1@163.com', account = 0, identity = False)
-    user2 = User(user_id = 2, user_name = 'why ask2', password = '123', email='2@gmail.com', account = 1000, identity = False )
-    user3 = User(user_id = 3, user_name = 'test_2', password = '111', email='Just_a_string', account = 100.15, identity = False)
+    m = hashlib.md5()
+    password_2 = "123"
+    password_2 = password_2.encode(encoding="utf-8")
+    m.update(password_2)
+    password_2 = m.hexdigest()
+
+    m = hashlib.md5()
+    password_3 = "111"
+    password_3 = password_3.encode(encoding="utf-8")
+    m.update(password_3)
+    password_3 = m.hexdigest()
+
+    user1 = User(user_id = 1, user_name = 'software engineering kills 01', password = password_1, email='1@163.com', account = 0, identity = False)
+    user2 = User(user_id = 2, user_name = 'why ask2', password = password_2, email='2@gmail.com', account = 1000, identity = False )
+    user3 = User(user_id = 3, user_name = 'test_2', password = password_3, email='Just_a_string', account = 100.15, identity = False)
 
     category1 = Category(category_id = 1, category_name = "test1")
     category2 = Category(category_id = 2, category_name = "test2")

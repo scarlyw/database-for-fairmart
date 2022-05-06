@@ -208,7 +208,7 @@ export default {
       
       var pw = this.form.password;
       var pwc = this.form.password_confirm;
-      const path = "http://10.2.35.12:8080/register";
+      const path = "http://localhost:8081/register";
       var is_register_success;
 
       if (pw != "" && pw != pwc) {
