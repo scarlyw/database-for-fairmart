@@ -984,8 +984,9 @@ def delete_favorite():
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
-        favorite_x = Favorites.query.filter(and_(Favorites.user_id == info["user_id"],
-                                                 Favorites.product_id == info["product_id"])).all()
+        
+        favorite_x = db.session.query(Favorites).filter(and_(Favorites.user_id == info["user_id"],
+                                                 Favorites.product_id == info["product_id"])).first()
         user_dict = {}
         #something error
         db.session.delete(favorite_x)
