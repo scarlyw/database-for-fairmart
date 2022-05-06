@@ -183,7 +183,7 @@ export default {
     },
     check_email() {
       var that = this;
-      const path = "http://10.2.35.12:8080/Email_exist";
+      const path = "http://localhost:8081/Email_exist";
       var email_info = {
         "email": this.form.Email,
       };
@@ -239,7 +239,7 @@ export default {
 			"email":this.form.Email,
 			"new_pw":this.pw_md,
 		};
-		const path="http://10.2.35.12:8080/resetpw"
+		const path="http://localhost:8081/resetpw"
 		
 		axios
 		.post(path,JSON.stringify(reset_info))

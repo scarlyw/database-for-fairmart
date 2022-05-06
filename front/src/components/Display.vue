@@ -2,10 +2,9 @@
 <template>
   <div class="Display">
     <el-container class="panal1">
-      <el-header height="160px">
-        <!--<img src="../assets/iphone.jpeg" width="240px" height="160px" />-->
+      <!-- <el-header height="160px">
         <img :src=goodsDisplay.photo class="pic">
-      </el-header>
+      </el-header> -->
       <!--<img src="../assets/logo.png">-->
 
       <el-main style = "padding: 10px;">
@@ -61,7 +60,7 @@ export default {
 <style>
 /*一个面板的设置，一共有6个面板*/
 .panal1 {
-  height: 400px; /*面板高度*/
+  height: 200px; /*面板高度*/
   background-color: white; /*面板颜色*/
   width: 300px; /*面板宽度 */
   position: relative;

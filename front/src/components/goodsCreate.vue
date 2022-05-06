@@ -164,7 +164,7 @@
 					GLOBAL.picture = "static/logo.jpg";
 					//在这里传给后端
 					//var that = this;
-					const path = "http://10.2.35.12:8080/userpostproduct";
+					const path = "http://localhost:8081/userpostproduct";
 					var goodsInformation = {
 						product_name: this.inputTitle1,
 						description: this.inputDescription,
@@ -238,7 +238,7 @@
 					}
 					GLOBAL.picture = "static/logo.jpg";
 					//在这里传给后端
-					const path = "http://10.2.35.12:8080/userpostproduct";
+					const path = "http://localhost:8081/userpostproduct";
 					var that = this;
 					console.log(iT);
 					var goodsInformation = {

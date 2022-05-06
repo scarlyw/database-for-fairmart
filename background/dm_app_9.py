@@ -26,7 +26,7 @@ app.config['SECRET_KEY'] = 'hard to guess'  # 一个字符串，密码。也可�
 
 # connect with the mysql database
 # The default database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1z2x3c@127.0.0.1:3306/test_0'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost:3306/test_0'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -738,14 +738,14 @@ def buy_product():
         if product_x.state == False:
             user_dict = {}
             user_dict["state"] = False
-            user_dict["result"] = "This product has been sold"
+            user_dict["result"] = "sold"
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
         elif buyer.account < product_x.price:
             user_dict = {}
             user_dict["state"] = False
-            user_dict["result"] = "You don't have enough money"
+            user_dict["result"] = "outOfMoney"
             res = make_response(json.dumps(user_dict))
             res.headers["Access-Control-Allow-Origin"] = '*'
             return res
@@ -965,23 +965,29 @@ def my_favorites():
         return
 
 
-# delete_favorites
+# delete_favorite
 # post: delete a certain product from the favorites folder
-@app.route('/delete_favorites', methods=['GET', 'POST', 'OPTIONS'])
-def delete_favorites():
+@app.route('/delete_favorite', methods=['GET', 'POST', 'OPTIONS'])
+def delete_favorite():
     info = json.loads(request.get_data())
     if request.method == 'GET':
-        print("delete favorites get error")
+        print("delete favorite get error")
         return
 
     elif request.method == 'POST':
         favorite_cnt = Favorites.query.filter(and_(Favorites.user_id == info["user_id"],
                                                  Favorites.product_id == info["product_id"])).count()
         if (favorite_cnt == 0):
-            return 
+            user_dict = {}
+            user_dict["state"] = False
+            user_dict["result"] = "no result"
+            res = make_response(json.dumps(user_dict))
+            res.headers["Access-Control-Allow-Origin"] = '*'
+            return res
         favorite_x = Favorites.query.filter(and_(Favorites.user_id == info["user_id"],
                                                  Favorites.product_id == info["product_id"])).all()
-        user_dict = to_dict(favorite_x)
+        user_dict = {}
+        #something error
         db.session.delete(favorite_x)
         db.session.commit()
         db.session.close()
@@ -1258,4 +1264,4 @@ def hello_world():
 # the initialization of new tables
 # not used in actual running process
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8081, debug=True)

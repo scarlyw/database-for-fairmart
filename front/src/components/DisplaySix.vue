@@ -91,12 +91,12 @@ export default {
     initialize() {
       this.description = "not a book";
       const that = this;
-      const path = "http://10.2.35.12:8080/usersearchproducts";
+      const path = "http://localhost:8081/user_search_products";
       var getGoods = {
         strategy_0: 0,
         strategy_1: GLOBAL.strategy_1,
         source_id: 0,
-        category_value: 0,
+        category_id: 0,
         key: this.searchkey,
       };
 	  if (this.searchtag > 0) {
@@ -104,7 +104,7 @@ export default {
 		    strategy_0: 1,
 		    strategy_1: 0,
 		    source_id: 0,
-		    category_value: this.searchtag,
+		    category_id: this.searchtag,
 		  	key: "",
 		  };
 	  }

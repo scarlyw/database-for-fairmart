@@ -69,7 +69,7 @@ export default {
   methods: {
     get_my_products() {
       var that = this;
-      var path = "http://10.2.35.12:8080/";
+      var path = "http://localhost:8081/";
       path+=this.type;
       console.log(path);
       var searchinfo = {

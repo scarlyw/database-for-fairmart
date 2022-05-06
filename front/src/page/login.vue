@@ -22,11 +22,11 @@
         <div class="lg_form">
           <div style="margin: 50px 0"></div>
           <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-            <el-form-item label="用户名">
+            <el-form-item label="邮箱">
               <el-col :span="20">
                 <el-input
-                  placeholder="请输入用户名"
-                  v-model="form.username"
+                  placeholder="请输入邮箱"
+                  v-model="form.email"
                 ></el-input>
               </el-col>
             </el-form-item>
@@ -58,13 +58,13 @@
             >立刻注册</el-link
           >
         </p>
-        <p>
+        <!-- <p>
           忘记密码？
           <el-link
             icon="el-icon-s-release"
             @click="gotoFindpw"
           >重置密码</el-link>
-        </p>
+        </p> -->
       </div>
     </div>
   </div>
@@ -89,7 +89,7 @@ export default {
   data: function () {
     return {
       form: {
-        username: "",
+        email: "",
         password: "",
       },
       rules: {
@@ -110,8 +110,8 @@ export default {
       this.$router.push({ path: "/", query: { from: "login" } });
     },
     doLogin() {
-		if(this.form.username=="" || this.form.password==""){
-			alert("请输入账号密码");
+		if(this.form.email=="" || this.form.password==""){
+			alert("请输入邮箱密码");
       return;
 		}
       var pw = this.form.password;
@@ -122,27 +122,31 @@ export default {
       console.log(this.pw_md);
 
       var loginInfo = {
-        user_name: this.form.username,
+        email: this.form.email,
         password: this.pw_md,
       };
       var that=this;
-      const path = "http://10.2.35.12:8080/login";
+      const path = "http://localhost:8081/login";
       axios.post(path, JSON.stringify(loginInfo)).then(function (response) {
         console.log("i accept");
         var login_result = response.data;
-        is_login_success = login_result["result"];
-        if (is_login_success == "success") {
+        console.log(response);
+        is_login_success = login_result["state"];
+        if (is_login_success == true) {
           //alert("登陆成功");
           var mymes=confirm("登陆成功");
           if(mymes==true){
             that.$router.push({ path: "/", query: { from: "login" } });
           }
-          GLOBAL.currentUser_ID = login_result["id"];
+          GLOBAL.currentUser_ID = login_result["user_id"];
           GLOBAL.currentUser_name = login_result["user_name"];
           GLOBAL.isLogined = true;
           GLOBAL.view = "myCenter";
           GLOBAL.isLogined = true;
-        } else if (is_login_success === "failed") {
+          GLOBAL.money = parseInt(login_result["account"]);
+          GLOBAL.identity = parseInt(login_result["identity"]);
+          GLOBAL.email = login_result["email"];
+        } else if (is_login_success === false) {
           alert("登陆失败");
           this.name = "";
           this.password = "";

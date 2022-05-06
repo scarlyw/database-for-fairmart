@@ -132,7 +132,7 @@ export default {
 
       GLOBAL.picture = "static/logo.jpg";
       //在这里传给后端
-      const path = "http://10.2.35.12:8080/userpostwanted";
+      const path = "http://localhost:8081/userpostwanted";
       var goodsInformation = {
         wanted_name: that.inputTitle,
         description: that.inputDescription, 

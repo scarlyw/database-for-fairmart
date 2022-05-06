@@ -7,10 +7,13 @@ const picture='/static/iphone.jpeg'
 var j_str=''
 var view="loginButton"
 var currentUser_name="未登录"
-var currentUser_ID
+var currentUser_ID = ""
 var isLogined=false
 var myAllProducts
 var strategy_1= 0
+var money
+var identity = 0    //is administrator
+var email
 export default{
     title,
     description,
@@ -25,4 +28,7 @@ export default{
     isLogined,
     myAllProducts,
     strategy_1,
+    money,
+    identity,
+    email,
 }

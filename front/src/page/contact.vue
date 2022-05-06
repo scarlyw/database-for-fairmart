@@ -284,7 +284,7 @@ export default {
       console.log("!!!!!!1");
       //在这里传给后端
       var that = this;
-      const path = "http://10.2.35.12:8080/wantedinfo"; // 我也不知道
+      const path = "http://localhost:8081/wantedinfo"; // 我也不知道
       var goodsInformation = {
         wanted_id: this.$route.query.product_id,
       };
@@ -335,7 +335,7 @@ export default {
       var nowDate = yy + "-" + mm + "-" + dd;
 
       //获取商品和买家信息
-      const path = "http://10.2.35.12:8080/buyproduct";
+      const path = "http://localhost:8081/buyproduct";
       var buyEvent = {
         buyer_id: GLOBAL.currentUser_ID,
         sold_product_id: this.product_id,

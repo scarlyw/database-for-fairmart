@@ -11,7 +11,7 @@
         border-radius="10xp"
       /><img />
       <el-col :span="24" id="item">
-        <span style="font-size:36px">{{userName}}</span>
+        <span style="font-size:30px">{{userName}}</span>
         <el-menu
           default-active="0"
           class="el-menu-vertical-demo"
@@ -21,15 +21,17 @@
           text-color="#fff"
           active-text-color="#ffd04b"
         >
-          <el-menu-item index="1" class="Item">
+        <div style="font-size:15px; margin:10px; color:#ffffff">邮箱：{{email}}</div>
+        <div style="font-size:15px;color:#ffffff">账户余额：{{money}}</div>
+          <!-- <el-menu-item index="1" class="Item">
             <i class="el-icon-message"></i>
             <span style="font-size:18px">我的消息</span>
-          </el-menu-item>
+          </el-menu-item> -->
 
-          <el-menu-item index="2" class="Item">
+          <!-- <el-menu-item index="2" class="Item">
             <i class="el-icon-shopping-cart-2"></i>
             <span slot="title" style="font-size:18px"> 购物车</span>
-          </el-menu-item>
+          </el-menu-item> -->
 
           <el-menu-item index="3" class="Item">
             <i class="el-icon-star-on"></i>
@@ -41,7 +43,7 @@
             <span slot="title" style="font-size:18px" @click="gotoCreate">发布商品</span>
           </el-menu-item>
 
-          <el-menu-item index="5" class="Item">
+          <!-- <el-menu-item index="5" class="Item">
             <i class="el-icon-upload2"></i>
             <span slot="title" style="font-size:18px" @click="gotoPut">发布求购</span>
           </el-menu-item>
@@ -49,7 +51,7 @@
           <el-menu-item index="5" class="Item">
             <i class="el-icon-view"></i>
             <span slot="title" style="font-size:18px" @click="gotoSeek">浏览求购</span>
-          </el-menu-item>
+          </el-menu-item> -->
 
         </el-menu>
       </el-col>
@@ -63,6 +65,8 @@ export default {
   data(){
     return{
       userName:GLOBAL.currentUser_name,
+      money:GLOBAL.money,
+      email:GLOBAL.email,
     }
   },
   methods: {
@@ -95,7 +99,7 @@ export default {
 
 <style>
 #bgr {
-  width: 260px;
+  width: 280px;
   float: left;
   margin-top: 30px;
   /*margin-right: 2%;*/
@@ -106,7 +110,7 @@ export default {
   border-radius: 25px;
   background: #696969;
   display: flex;
-  height: 700px;
+  height: 600px;
 	
 }
 #id {

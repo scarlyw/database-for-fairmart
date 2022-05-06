@@ -34,7 +34,7 @@
           @mouseover="gd_changeBcolor($event, '#a2a19f')"
           @mouseleave="gd_changeBcolor($event, '#E8E7E3')"
         >
-          <a href="https://github.com/scarlyw/Wisdom-Bazaar" title="联系我们"> 联系我们</a>
+          <a href="https://github.com/scarlyw/database-for-fairmart" title="联系我们"> 联系我们</a>
         </li>
       </ul>
     </div>
@@ -46,7 +46,6 @@
           {{ getDetail() }}
         </div>
         <div style="width: 684px; height: 464px; float: left">
-          <!-- 这里放图片 -->
           <img
             :src="photo"
             width="684px"
@@ -153,7 +152,7 @@
         <!-- 下面还有两个按钮 -->
         <div
           style="
-            height: 130px;
+            height: 90px;
             width: 535px;
             margin-left: 42px;
             margin-top: 42px;
@@ -163,10 +162,10 @@
           <button
             type="button"
             style="
-              height: 130px;
-              width: 240px;
+              height: 90px;
+              width: 170px;
               float: left;
-              font-size: 48px;
+              font-size:35px;
               background-color: rgba(255, 77, 79, 1);
               border-radius: 15px;
               color: white;
@@ -174,16 +173,32 @@
             @click="dialog_buying_Visible=true"
             v-if="display_buy_button"
           >
-            立即联系
+            立即购买
           </button>
           <button
             type="button"
             style="
-              height: 130px;
-              width: 240px;
+              height: 90px;
+              width: 170px;
+              float: left;
+              font-size: 35px;
+              background-color: rgba(255, 77, 79, 1);
+              border-radius: 15px;
+              color: white;
+            "
+            @click="get_user_info"
+            v-if="display_email_button"
+          >
+            联系卖家
+          </button>
+          <button
+            type="button"
+            style="
+              height: 90px;
+              width: 170px;
               margin-left: 20px;
               float: left;
-              font-size: 48px;
+              font-size: 35px;
               background-color: rgba(232, 169, 132, 1);
               border-radius: 15px;
               color: white;
@@ -191,7 +206,7 @@
             @click="addtoFavorite"
             v-if="display_fav_button"
           >
-            加入收藏
+            {{favorite_str}}
           </button>
         </div>
       </div>
@@ -251,6 +266,21 @@
               >
             </span>
           </el-dialog>
+
+          <el-dialog
+            :visible.sync="dialog_email_Visible"
+            width="50%"
+            style="text-align: center"
+            :before-close="handleClose"
+          >
+            <!-- <repassword></repassword> -->
+            <div>卖家邮箱：{{seller_email}}</div>
+            <div>卖家其他联系方式：{{seller_contact_description}}</div>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="dialog_email_Visible = false"
+                >确 定</el-button>
+            </span>
+          </el-dialog>
         
       </div>
     </div>
@@ -279,14 +309,18 @@ export default {
 	  title: this.title,
       description: "",
       price: 0,
-      value: "",
+      seller_email:"",
+      seller_contact_description:"",
       photo:"",
       product_id: this.$route.query.product_id,
       type:this.$route.query.type,
       dialog_buying_Visible: false,
+      dialog_email_Visible: false,
       checkbuy:"",
       display_buy_button:true,
       display_fav_button:true,
+      display_email_button:true,
+      favorite_str:"加入收藏",
     };
   },
   created(){
@@ -333,11 +367,33 @@ export default {
       
       console.log(data);
     },
+    get_user_info() {
+      if(GLOBAL.currentUser_ID=="")
+      {
+        alert("目前尚未登陆，请登录后再进行操作!");
+        return;
+      }
+      this.dialog_email_Visible=true;
+      if(this.seller_email == "") {
+        var that = this;
+        const seller_info_path = "http://localhost:8081/get_seller_info";
+        var goodsInformation = {
+          product_id: this.$route.query.product_id,
+        };
+        axios
+          .post(seller_info_path,JSON.stringify(goodsInformation))
+          .then(function (res) {
+            var info = res.data;
+            that.seller_email = info["email"];
+            that.seller_contact_description = info["other_connect_description"];
+          });
+      }
+    },
     getDetail() {
       console.log("!!!!!!1");
       //在这里传给后端
       var that = this;
-      const path = "http://10.2.35.12:8080/productinfo"; // 我也不知道
+      const path = "http://localhost:8081/product_info"; // 我也不知道
       var goodsInformation = {
         product_id: this.$route.query.product_id,
       };
@@ -347,21 +403,34 @@ export default {
           // response.setContentType("text/javascript;charset=UTF-8");
           var goods = response.data;
           console.log("!!!!!!!!!!!!!!!!" + goods["product_name"]);
-          console.log(goods["description"]);
+          console.log(goods["product_id"]);
           console.log(goods["price"]);
-          console.log(goods["number"]);
-          console.log(goods["value"]);
+          console.log(goods["state"]);
+          console.log(goods["put_timestamp"]);
           // modified by xcc 2021.11.24 21:57
           that.title = goods["product_name"];
-          that.description = goods["description"];
+          that.description = goods["product_description"];
           that.price = goods["price"];
-          that.value = goods["category_value"];
-          console.log(goods["photo"]);
-          that.photo = goods["photo"]
+          that.photo = goods["photo"];
           //that.decodePhoto(goods["photo"]);
-          console.log(that.photo);
-          
         });
+
+        const favorite_path = "http://localhost:8081/get_favorite_state";
+        var info = {
+          product_id: this.$route.query.product_id,
+          user_id: GLOBAL.currentUser_ID,
+        };
+        axios
+          .post(favorite_path,JSON.stringify(info))
+          .then(function (res) {
+            var result = res.data;
+            console.log(result);
+            var is_exist = result.state;
+            if(is_exist == true) {
+              that.favorite_str = "已收藏";
+            }
+          });
+
     },
     handleClose(done) {
         this.$confirm('确认关闭？')
@@ -381,24 +450,12 @@ export default {
         alert("目前尚未登陆，请登录后再进行操作!");
         return;
       }
-      //获取当前的时间，命名可谓是非常简陋
-      let yy = new Date().getFullYear();
-      let mm = new Date().getMonth() + 1;
-      let dd = new Date().getDate();
-      let hh = new Date().getHours();
-      let mf =
-        new Date().getMinutes() < 10
-          ? "0" + new Date().getMinutes()
-          : new Date().getMinutes();
-      var nowTime=hh+":"+mf;
-      var nowDate=yy+"-"+mm+"-"+dd;
 
       //获取商品和买家信息
-      const  path="http://10.2.35.12:8080/buyproduct";
+      const  path="http://localhost:8081/buy_product";
       var buyEvent={
-        "buyer_id":GLOBAL.currentUser_ID,
-        "sold_product_id":this.product_id,
-        "time":nowDate + ' ' + nowTime,
+        "user_id":GLOBAL.currentUser_ID,
+        "product_id":this.product_id,
       }
       var that=this;
       //此处打印很成功，注意键值对的格式
@@ -408,14 +465,20 @@ export default {
 					.post(path,JSON.stringify(buyEvent))
 					.then(function(response){
 						var buy_result=response.data
-						var  is_buy_success = buy_result["result"];
+						var  result = buy_result["result"];
+            var is_buy_success = buy_result["state"]
 						//alart(is_register_success)
 						console.log(buy_result);//注意返回格式
-						if(is_buy_success==="failed"){
-							alert("购买失败，请重试");
+						if(is_buy_success == false&&result==="outOfMoney"){
+							alert("余额不足，请充值");
               that.dialog_buying_Visible=false;
-						}else if(is_buy_success==="success"){
-              var alert_str="购买成功，卖家的微信为:"+buy_result["seller_wechat"]+" 请及时联系"
+						}
+            else if(is_buy_success == false&&result==="sold") {
+							alert("商品已售出");
+              that.dialog_buying_Visible=false;
+            }
+            else if(is_buy_success == true){
+              var alert_str="购买成功"
               that.dialog_buying_Visible=false;
 							alert(alert_str);
               
@@ -433,29 +496,54 @@ export default {
         alert("请登录后重试");
         return;
       }
-      console.log("进入收藏函数")
-      const path="http://10.2.35.12:8080/addfavorite"
-      var favorite_info={
-        "buyer_id":GLOBAL.currentUser_ID,
-        "product_id":this.product_id
-      }
-      axios
-					.post(path,JSON.stringify(favorite_info))
-					.then(function(response){
-						var favorite_result=response.data
-						var  is_favorite_success = favorite_result["result"];
-						//alart(is_register_success)
-						console.log(favorite_result);//注意返回格式
-						if(is_favorite_success==="failed"){
-							alert("收藏失败，请重试");
-						}else if(is_favorite_success==="success"){
-              var alert_str="收藏成功"
-							alert(alert_str);
+      if(this.favorite_str == "已收藏") {
+        console.log("进入删除收藏函数")
+        const path="http://localhost:8081/delete_favorite"
+        var favorite_info={
+          "user_id":GLOBAL.currentUser_ID,
+          "product_id":this.product_id
+        }
+        axios
+            .post(path,JSON.stringify(favorite_info))
+            .then(function(response){
+              var favorite_result=response.data
+              var delete_favorite_success = favorite_result["state"];
+              //alart(is_register_success)
+              console.log(favorite_result);//注意返回格式
+              if(delete_favorite_success===true){
+                that.favorite_str = "加入收藏";
+                alert("已取消收藏");
+              }else{
+                var alert_str="取消收藏失败";
+                alert(alert_str);
+                }
 
-						}else{
-							alert("收藏失败");
-						}
-					});
+            });
+      }
+      else {
+        console.log("进入收藏函数")
+        const path="http://localhost:8081/add_favorite"
+        var favorite_info={
+          "user_id":GLOBAL.currentUser_ID,
+          "product_id":this.product_id
+        }
+        axios
+            .post(path,JSON.stringify(favorite_info))
+            .then(function(response){
+              var favorite_result=response.data
+              var  is_favorite_success = favorite_result["state"];
+              //alart(is_register_success)
+              console.log(favorite_result);//注意返回格式
+              if(is_favorite_success===true){
+                that.favorite_str = "已收藏"
+                alert("收藏成功");
+              }else{
+                var alert_str="收藏失败"
+                alert(alert_str);
+                }
+
+            });
+      }
     }
   },
   

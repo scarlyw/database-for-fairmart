@@ -90,7 +90,7 @@ export default {
     },
     deleteProduct(){
       console.log("enter deleteProduct");
-      const path="http://10.2.35.12:8080//deleteproduct";
+      const path="http://localhost:8081//deleteproduct";
       var deleteinfo={
         "deleteproduct_id":this.local.product_id,
       };
@@ -119,7 +119,7 @@ export default {
     },
     deleteFromFavorite(){
       console.log("enter delete favorite")
-      const path="http://10.2.35.12:8080/deletefavorites";
+      const path="http://localhost:8081/deletefavorites";
       var deleteinfo={
         "delete_id":this.local.product_id,
         "source_id":GLOBAL.currentUser_ID,
