@@ -492,6 +492,7 @@ export default {
 
     },
     addtoFavorite(){
+      var that = this;
       if(GLOBAL.currentUser_ID==""){
         alert("请登录后重试");
         return;
@@ -535,7 +536,7 @@ export default {
               //alart(is_register_success)
               console.log(favorite_result);//注意返回格式
               if(is_favorite_success===true){
-                that.favorite_str = "已收藏"
+                that.favorite_str = "已收藏";
                 alert("收藏成功");
               }else{
                 var alert_str="收藏失败"
