@@ -11,6 +11,9 @@ var currentUser_ID
 var isLogined=false
 var myAllProducts
 var strategy_1= 0
+var money = 0
+var identity = 0    //is administrator
+var email = "未登录"
 export default{
     title,
     description,
@@ -25,4 +28,7 @@ export default{
     isLogined,
     myAllProducts,
     strategy_1,
+    money,
+    identity,
+    email,
 }
