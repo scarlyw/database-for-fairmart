@@ -28,10 +28,10 @@
             <span style="font-size:18px">我的消息</span>
           </el-menu-item> -->
 
-          <!-- <el-menu-item index="2" class="Item">
+          <el-menu-item index="2" class="Item">
             <i class="el-icon-shopping-cart-2"></i>
-            <span slot="title" style="font-size:18px"> 购物车</span>
-          </el-menu-item> -->
+            <span slot="title" style="font-size:18px" @click="gotoMyPurchase"> 购买记录</span>
+          </el-menu-item>
 
           <el-menu-item index="3" class="Item">
             <i class="el-icon-star-on"></i>
@@ -78,6 +78,9 @@ export default {
     },
     gotoCreate(){
       this.$router.replace('/createItem')
+    },
+    gotoMyPurchase(){
+      this.$router.replace('/myGoods')
     },
     gotoGerenzhuye()
     {
