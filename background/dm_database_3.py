@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost:3
 #app.config['SQLALCHEMY_BINDS'] = SQLALCHEMY_BINDS
 
 #设置下方这行code后，在每次请求结束后会自动提交数据库中的变动
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 

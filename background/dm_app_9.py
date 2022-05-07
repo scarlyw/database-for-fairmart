@@ -88,7 +88,7 @@ def user_post_product():
                               price = info["price"],
                               photo_path = url,
                               state = True,
-                              put_timestamp = datetime.now, 
+                              put_timestamp = datetime.now(), 
                               product_description = info["product_description"])
         db.session.add(product_new)
         db.session.commit()
@@ -753,7 +753,7 @@ def buy_product():
         history_x = History(user_provider_id = product_x.user_id,
                             user_purchaser_id = info["user_id"],
                             product_id = info["product_id"],
-                            timestamp = datetime.now)
+                            timestamp = datetime.now())
 
         buyer.account -= product_x.price
         seller.account += product_x.price
