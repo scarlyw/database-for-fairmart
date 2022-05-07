@@ -91,31 +91,31 @@
 				inputPrice: "",
 				num: 1,
 				options: [{
-						value: "选项1",
+						value: "1",
 						label: "二手书本"
 					},
 					{
-						value: "选项2",
+						value: "2",
 						label: "数码产品"
 					},
 					{
-						value: "选项3",
+						value: "3",
 						label: "票务转让"
 					},
 					{
-						value: "选项4",
+						value: "4",
 						label: "二手衣物"
 					},
 					{
-						value: "选项5",
+						value: "5",
 						label: "生活用品"
 					},
 					{
-						value: "选项6",
+						value: "6",
 						label: "运动装备"
 					},
 					{
-						value: "选项7",
+						value: "7",
 						label: "其他二手"
 					},
 				],
@@ -195,7 +195,7 @@
 				const path = "http://localhost:8081/user_post_product";
 				var that = this;
 				var goodsInformation = {
-					"product_name": inputTitle1,
+					"product_name": this.inputTitle1,
 					"product_description": this.inputDescription,
 					"price": this.inputPrice,
 					"category_id": this.value,
