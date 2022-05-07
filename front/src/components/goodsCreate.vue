@@ -5,7 +5,7 @@
 <template>
 	<div class="createInput">
 		<div class="title">
-			<span id="title">商品标题</span>
+			<span id="title">商品名称</span>
 			<span id="inputTitle1">
 				<div id="titleTextbox">
 					<el-input v-model="inputTitle1" placeholder="请输入内容" @input="change($event)"></el-input>
@@ -22,13 +22,13 @@
 				</div>
 			</span>
 		</div>
-		<div class="goodsNum">
+		<!-- <div class="goodsNum">
 			<span id="goodsNum">选择数量</span>
 			<span id="selectNum">
 				<el-input-number v-model="num" @change="handleChange" :min="1" :max="10" label="描述文字"
 					@input="change($event)"></el-input-number>
 			</span>
-		</div>
+		</div> -->
 		<div class="price1">
 			<span id="price">选择价格</span>
 			<span id="inputPrice">
@@ -68,16 +68,15 @@
 				<el-button type="success" @click="gotoHome">返回</el-button>
 			</div>
 		</div>
-		<div class="picture">
+		<!-- <div class="picture">
 			<div id="picUploader">
 				<input class="upload-demo" :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList"
 					list-type="picture" type="file" name="myFile" id="myFile">
-				<!--<el-button size="medium" type="primary">点击上传图片</el-button>-->
 				<div slot="tip" class="el-upload__tip">
 					只能上传jpg/png文件，且不超过500kb
 				</div>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </template>
 
@@ -131,148 +130,88 @@
 			handleChange(value) {
 				console.log(value);
 			},
-			printImg() {
-				console.log(this.inputTitle1);
-				console.log(this.inputDescription);
-				console.log(this.inputPrice);
-				console.log(this.num);
-				console.log(this.value);
-				console.log("sdad");
-				console.log(document.getElementById("myFile").value);
-				this.photo = document.getElementById("myFile").value;
-				console.log(this.photo);
-				var file = document.getElementById("myFile").files[0];
-				const that = this;
-				if (file) {
-					console.log(file.size);
-					var reader = new FileReader();
-					reader.readAsDataURL(file);
-					reader.onload = function() {
-						console.log("onload");
-						console.log(this.result);
-						that.photosrc = this.result;
-					}
-					// 将 photosrc 传到后台就行了
-					console.log("this photosrc");
-					console.log(this.photosrc);
-					//this.$root.title=this.inputTitle;
-					// GLOBAL.title=this.inputTitle;
-					// GLOBAL.price=this.inputPrice;
-					// GLOBAL.description=this.inputDescription;
-					// GLOBAL.number=this.num;
-					// GLOBAL.category=this.value;
-					GLOBAL.picture = "static/logo.jpg";
-					//在这里传给后端
-					//var that = this;
-					const path = "http://localhost:8081/userpostproduct";
-					var goodsInformation = {
-						product_name: this.inputTitle1,
-						description: this.inputDescription,
-						price: this.inputPrice,
-						number: this.num,
-						category_value: this.value,
-						photo: this.photosrc,
-						source_id: GLOBAL.currentUser_ID,
-					};
-					axios
-						.post(path, JSON.stringify(goodsInformation))
-						.then(function(response) {
-							// response.setContentType("text/javascript;charset=UTF-8");
-							var goods = response.data;
-							console.log("!!!!!!!!!!!!!!!!" + goods["Title"]);
-							console.log(goods["description"]);
-							console.log(goods["price"]);
-							console.log(goods["number"]);
-							console.log(goods["value"]);
-							GLOBAL.title = goods["name"];
-							GLOBAL.description = goods["description"];
-							GLOBAL.price = goods["price"];
-							GLOBAL.number = goods["id"];
-							GLOBAL.category = goods["value"];
-						});
-				}
-			},
+			// printImg() {
+			// 	console.log(this.inputTitle1);
+			// 	console.log(this.inputDescription);
+			// 	console.log(this.inputPrice);
+			// 	console.log(this.num);
+			// 	console.log(this.value);
+			// 	console.log("sdad");
+			// 	console.log(document.getElementById("myFile").value);
+			// 	this.photo = document.getElementById("myFile").value;
+			// 	console.log(this.photo);
+			// 	var file = document.getElementById("myFile").files[0];
+			// 	const that = this;
+			// 	if (file) {
+			// 		console.log(file.size);
+			// 		var reader = new FileReader();
+			// 		reader.readAsDataURL(file);
+			// 		reader.onload = function() {
+			// 			console.log("onload");
+			// 			console.log(this.result);
+			// 			that.photosrc = this.result;
+			// 		}
+			// 		// 将 photosrc 传到后台就行了
+			// 		console.log("this photosrc");
+			// 		console.log(this.photosrc);
+			// 		//this.$root.title=this.inputTitle;
+			// 		// GLOBAL.title=this.inputTitle;
+			// 		// GLOBAL.price=this.inputPrice;
+			// 		// GLOBAL.description=this.inputDescription;
+			// 		// GLOBAL.number=this.num;
+			// 		// GLOBAL.category=this.value;
+			// 		GLOBAL.picture = "static/logo.jpg";
+			// 		//在这里传给后端
+			// 		//var that = this;
+			// 		const path = "http://localhost:8081/user_post_product";
+			// 		var goodsInformation = {
+			// 			product_name: this.inputTitle1,
+			// 			description: this.inputDescription,
+			// 			price: this.inputPrice,
+			// 			number: this.num,
+			// 			category_value: this.value,
+			// 			photo: this.photosrc,
+			// 			source_id: GLOBAL.currentUser_ID,
+			// 		};
+			// 		axios
+			// 			.post(path, JSON.stringify(goodsInformation))
+			// 			.then(function(response) {
+			// 				// response.setContentType("text/javascript;charset=UTF-8");
+			// 				var goods = response.data;
+			// 				console.log("!!!!!!!!!!!!!!!!" + goods["Title"]);
+			// 				console.log(goods["description"]);
+			// 				console.log(goods["price"]);
+			// 				console.log(goods["number"]);
+			// 				console.log(goods["value"]);
+			// 				GLOBAL.title = goods["name"];
+			// 				GLOBAL.description = goods["description"];
+			// 				GLOBAL.price = goods["price"];
+			// 				GLOBAL.number = goods["id"];
+			// 				GLOBAL.category = goods["value"];
+			// 			});
+			// 	}
+			// },
 			sendMsg() {
-				let yy = new Date().getFullYear();
-				let mm = new Date().getMonth() + 1;
-				let dd = new Date().getDate();
-				let hh = new Date().getHours();
-				let mf =
-					new Date().getMinutes() < 10 ?
-					"0" + new Date().getMinutes() :
-					new Date().getMinutes();
-				var sec = new Date().getSeconds();
-				var nowTime = hh + ":" + mf;
-				var nowDate = yy + "-" + mm + "-" + dd;
-				var sys_clock = nowDate + nowTime + sec;
-				console.log(this.inputDescription);
-				//console.log(document.getElementById("myFile").value);
-				this.photo = document.getElementById("myFile").value;
-				//console.log(this.photo);
-				var file = document.getElementById("myFile").files[0];
+				const path = "http://localhost:8081/user_post_product";
 				var that = this;
-				var iT = this.inputTitle1;
-				console.log(this.inputTitle1);
-				console.log(iT);
-				var iD = this.inputDescription;
-				var iP = this.inputPrice;
-				var iN = this.num;
-				var iV = this.value;
-				var iPH = this.photosrc;
-				new Promise(function(resolve, reject) {
-					if (file) {
-						console.log(file.size);
-						var reader = new FileReader();
-						reader.readAsDataURL(file);
-						reader.onload = function() {
-							console.log("onload");
-							console.log(this.result);
-							iPH = this.result;
-							resolve();
-						}
-					}
-				}).then(function() {
-					if(file.size>50*1024){
-						alert("图片过大，请上传小于50k的图");
-						this.reload();
-					}
-					GLOBAL.picture = "static/logo.jpg";
-					//在这里传给后端
-					const path = "http://localhost:8081/userpostproduct";
-					var that = this;
-					console.log(iT);
-					var goodsInformation = {
-						"product_name": iT,
-						"description": iD,
-						"price": iP,
-						"number": iN,
-						"category_value": iV,
-						"photo": iPH,
-						"source_id": GLOBAL.currentUser_ID,
-						"clock": sys_clock,
-					};
-					console.log(goodsInformation);
-					var that = this;
-					axios
-						.post(path, JSON.stringify(goodsInformation))
-						.then(function(response) {
-							// response.setContentType("text/javascript;charset=UTF-8");
-							var goods = response.data;
-							// console.log("!!!!!!!!!!!!!!!!" + goods["Title"]);
-							// console.log(goods["description"]);
-							// console.log(goods["price"]);
-							// console.log(goods["number"]);
-							// console.log(goods["value"]);
-							GLOBAL.title = goods["name"];
-							GLOBAL.description = goods["description"];
-							GLOBAL.price = goods["price"];
-							GLOBAL.number = goods["id"];
-							GLOBAL.category = goods["value"];
-						});
-						
-				});
-				alert("发布成功");
-				this.$router.replace("/");
+				var goodsInformation = {
+					"product_name": inputTitle1,
+					"product_description": this.inputDescription,
+					"price": this.inputPrice,
+					"category_id": this.value,
+					"user_id": GLOBAL.currentUser_ID,
+				};
+				console.log(goodsInformation);
+				axios
+					.post(path, JSON.stringify(goodsInformation))
+					.then(function(response) {
+						// var goods = response.data;
+						// GLOBAL.title = goods["product_name"];
+						// GLOBAL.description = goods["product_description"];
+						// GLOBAL.price = goods["price"];
+						// GLOBAL.category = goods["category_id"];
+						that.$router.replace("/");
+					});
 			},
 			gotoHome() {
 				this.$router.replace("/");
