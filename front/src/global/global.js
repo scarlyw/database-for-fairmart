@@ -11,9 +11,10 @@ var currentUser_ID = ""
 var isLogined=false
 var myAllProducts
 var strategy_1= 0
-var money
-var identity = 0    //is administrator
-var email
+var money = 0
+var identity = false    //is administrator
+var email = ""
+var contact_description = ""
 export default{
     title,
     description,
@@ -31,4 +32,5 @@ export default{
     money,
     identity,
     email,
+    contact_description,
 }

@@ -206,17 +206,17 @@ def user_search_products():
         for i in range(len(search_result_1)):
             item_original = search_result_1[i]
             item_modify = to_dict(item_original)
-            basedir = os.path.abspath(os.path.dirname(__file__))
+            # basedir = os.path.abspath(os.path.dirname(__file__))
             # if item_modify["photo_path"]:
             #     path = item_modify["photo_path"]
             # else:
-            path = "\static\img\\2022-4-2919-516-10.png"       
-            path_photo_picture_save = basedir + path
-            # print(basedir)
-            # print(path_photo_picture_save)
-            with open(path_photo_picture_save, 'r') as f:
-                photo = f.read()
-            item_modify["photo"] = photo
+            # path = "\static\img\\2022-4-2919-516-10.png"       
+            # path_photo_picture_save = basedir + path
+            # # print(basedir)
+            # # print(path_photo_picture_save)
+            # with open(path_photo_picture_save, 'r') as f:
+            #     photo = f.read()
+            # item_modify["photo"] = photo
             search_result_1[i] = item_modify
 
         # print(search_result_1)
@@ -273,16 +273,16 @@ def user_all_products():
         for i in range(len(search_result_1)):
             item_original = search_result_1[i]
             item_modify = to_dict(item_original)
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            # print(basedir)
-            # if item_modify["photo_path"]:
-            #     path = item_modify["photo_path"]
-            # else:
-            path = "\static\img\\2022-4-2919-516-10.png"       
-            path_photo_picture_save = basedir + path
-            with open(path_photo_picture_save, 'r') as f:
-                photo = f.read()
-            item_modify["photo"] = photo
+            # basedir = os.path.abspath(os.path.dirname(__file__))
+            # # print(basedir)
+            # # if item_modify["photo_path"]:
+            # #     path = item_modify["photo_path"]
+            # # else:
+            # path = "\static\img\\2022-4-2919-516-10.png"       
+            # path_photo_picture_save = basedir + path
+            # with open(path_photo_picture_save, 'r') as f:
+            #     photo = f.read()
+            # item_modify["photo"] = photo
             search_result_1[i] = item_modify
 
         res = make_response(json.dumps(search_result_1))
@@ -920,14 +920,14 @@ def my_favorites():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
-                                                     select favorites.product_id from favorites where user_id = %d' 
+            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
+                                                     (select favorites.product_id from favorites where user_id = %d)' 
                                                      % info["category_id"], info["user_id"])
         else:
-            search_result = db.session.execite('select * from product where product_id in \
-                                                     select favorites.product_id from favorites where user_id = %d' 
+            search_result = db.session.execute('select * from product where product_id in \
+                                                     (select favorites.product_id from favorites where user_id = %d)' 
                                                      % info["user_id"])
-
+        search_result = list(search_result)
         # different sorting strategies
         # automatically present the product by id
         if info["strategy_1"] == 0:
@@ -1018,14 +1018,15 @@ def my_purchase():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
-                                                     select history.product_id from history where user_purchaser_id = %d' 
+            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
+                                                     (select history.product_id from history where user_purchaser_id = %d)' 
                                                      % info["category_id"], info["user_id"])
         else:
-            search_result = db.session.execite('select * from product where product_id in \
-                                                     select history.product_id from history where user_purchaser_id = %d' 
+            search_result = db.session.execute('select * from product where product_id in \
+                                                     (select history.product_id from history where user_purchaser_id = %d)' 
                                                      % info["user_id"])
 
+        search_result = list(search_result)
         # different sorting strategies
         # automatically present the product by id
         if info["strategy_1"] == 0:
@@ -1076,14 +1077,14 @@ def my_sold():
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execite('select * from product where category_id = %d and product_id in \
-                                                     select history.product_id from history where user_provider_id = %d' 
+            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
+                                                     (select history.product_id from history where user_provider_id = %d)' 
                                                      % info["category_id"], info["user_id"])
         else:
-            search_result = db.session.execite('select * from product where product_id in \
-                                                     select history.product_id from history where user_provider_id = %d' 
+            search_result = db.session.execute('select * from product where product_id in \
+                                                     (select history.product_id from history where user_provider_id = %d)' 
                                                      % info["user_id"])
-
+        search_result = list(search_result)
         # different sorting strategies
         # automatically present the product by id
         if info["strategy_1"] == 0:
@@ -1198,7 +1199,7 @@ def deposit():
         return res
 
     user_x = db.session.query(User).filter(User.user_id == info["user_id"]).first()
-    user_x.account += info["money"]
+    user_x.account += float(info["money"])
     db.session.add(user_x)
     db.session.commit()
     db.session.close()

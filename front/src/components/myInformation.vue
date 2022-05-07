@@ -28,10 +28,10 @@
             <span style="font-size:18px">我的消息</span>
           </el-menu-item> -->
 
-          <!-- <el-menu-item index="2" class="Item">
+          <el-menu-item index="2" class="Item">
             <i class="el-icon-shopping-cart-2"></i>
-            <span slot="title" style="font-size:18px"> 购物车</span>
-          </el-menu-item> -->
+            <span slot="title" style="font-size:18px" @click="gotoMyPurchase"> 购买记录</span>
+          </el-menu-item>
 
           <el-menu-item index="3" class="Item">
             <i class="el-icon-star-on"></i>
@@ -62,6 +62,7 @@
 <script>
 import GLOBAL from '@/global/global'
 export default {
+  inject:["reload"],
   data(){
     return{
       userName:GLOBAL.currentUser_name,
@@ -79,6 +80,9 @@ export default {
     gotoCreate(){
       this.$router.replace('/createItem')
     },
+    gotoMyPurchase(){
+      this.$router.push({path:"/myGoods",query: {type:"my_purchase"}});
+    },
     gotoGerenzhuye()
     {
       this.$router.replace('/gerenzhuye')
@@ -90,9 +94,13 @@ export default {
       this.$router.replace('/putGoods')
     },
     gotoMyFavorite(){
-      console.log("goto my favorite");
-      this.$router.push({path:"myGoods",query:{type:"myfavorites"}});
+      this.$router.push({path:"/myGoods",query: {type:"my_favorites"}});
     }
+  },
+  watch :{
+        '$route': function (to, from) {
+          this.reload();
+        }
   },
 };
 </script>

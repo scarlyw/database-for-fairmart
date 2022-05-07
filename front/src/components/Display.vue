@@ -24,8 +24,21 @@
 		  ￥{{ goodsDisplay.price }}
 		</body>
         <el-button class="button" @click="gotoDetail"> 查看 </el-button>
+        <el-button v-if="identity" class="button" @click="dialog_deleteProduct_Visible=true"> 删除 </el-button>
       </el-footer>
     </el-container>
+    <el-dialog
+      :visible.sync="dialog_deleteProduct_Visible"
+      width="50%"
+      style="text-align: center"
+      
+    >
+      <span>确认删除此商品？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialog_deleteProduct_Visible = false">取 消</el-button>
+        <el-button type="primary" @click="deleteProduct">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -43,15 +56,43 @@ export default {
       picture: GLOBAL.picture,
       goodsDisplay:this.goodsContent,
 	    product_id:this.goodsContent.product_id,
+      identity:GLOBAL.identity,
+      dialog_deleteProduct_Visible:false,
     };
   },
   created:function(){
     this.title="myTry";
+    this.identity = GLOBAL.identity;
   },
   methods:{
     gotoDetail(){
       console.log(this.goodsDisplay); 
       this.$router.push({path:'/goodDetail',query:{product_id:this.product_id,}});
+    },
+    deleteProduct(){
+      if(GLOBAL.currentUser_ID == "") {
+        dialog_deleteProduct_Visible = false;
+        alert("请登录后再试");
+      }
+      const path = "http://localhost:8081/delete_product";
+      var that = this;
+      var Info = {
+        user_id: GLOBAL.currentUser_ID,
+        product_id: this.product_id,
+      };
+      axios.post(path, JSON.stringify(Info)).then(function (response) {
+        console.log("accept");
+        var result = response.data;
+        var delete_success = result["state"];
+        if (delete_success == true) {
+          var mymes=confirm("删除成功");
+          if(mymes==true){
+            that.$router.push("/refresh");
+          }
+        } else {
+          alert("修改失败，请重试");
+        }
+      });
     },
   },
 };

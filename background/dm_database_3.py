@@ -185,8 +185,8 @@ if __name__ == '__main__':
     m.update(password_3)
     password_3 = m.hexdigest()
 
-    user1 = User(user_id = 1, user_name = 'software engineering kills 01', password = password_1, email='1@163.com', account = 0, identity = False)
-    user2 = User(user_id = 2, user_name = 'why ask2', password = password_2, email='2@gmail.com', account = 1000, identity = False )
+    user1 = User(user_id = 1, user_name = 'software engineering kills 01', password = password_1, email='1@163.com', account = 100.1, identity = False)
+    user2 = User(user_id = 2, user_name = 'why ask2', password = password_2, email='2@gmail.com', account = 1000, identity = True )
     user3 = User(user_id = 3, user_name = 'test_2', password = password_3, email='Just_a_string', account = 100.15, identity = False)
 
     category1 = Category(category_id = 1, category_name = "test1")

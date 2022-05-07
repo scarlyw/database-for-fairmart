@@ -13,7 +13,13 @@ import publish from '@/page/publishPage'
 import Search from '@/page/search'
 import contact from '@/page/contact'
 import Searchbytag from '@/page/searchbytag'
+import refresh from '@/page/refresh'
 Vue.use(Router)
+// replace 方法同理
+const originalPush = Router.push;
+Router.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err);
+};
 
 export default new Router({
   routes: [
@@ -78,9 +84,16 @@ export default new Router({
     component:contact,
   },
   {
-	path:'/tag',
-	name:'Searchbytag',
-	component:Searchbytag,
+    path:'/tag',
+    name:'Searchbytag',
+    component:Searchbytag,
+  },
+  {
+    path: '/refresh',
+    component: resolve => require(['@/page/refresh'], resolve),
+    meta: {
+      title: '用于同路由刷新'
+    }
   },
   ]
 })

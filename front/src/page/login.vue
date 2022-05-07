@@ -135,21 +135,22 @@ export default {
         if (is_login_success == true) {
           //alert("登陆成功");
           var mymes=confirm("登陆成功");
-          if(mymes==true){
-            that.$router.push({ path: "/", query: { from: "login" } });
-          }
           GLOBAL.currentUser_ID = login_result["user_id"];
           GLOBAL.currentUser_name = login_result["user_name"];
           GLOBAL.isLogined = true;
           GLOBAL.view = "myCenter";
           GLOBAL.isLogined = true;
           GLOBAL.money = parseInt(login_result["account"]);
-          GLOBAL.identity = parseInt(login_result["identity"]);
+          GLOBAL.identity =login_result["identity"];
+          console.log("global identity:",GLOBAL.identity);
           GLOBAL.email = login_result["email"];
+          GLOBAL.contact_description = login_result["other_contact_description"];
+          if(mymes==true){
+            that.$router.push({ path: "/", query: { from: "login" } });
+          }
+          // that.$router.push("/");
         } else if (is_login_success === false) {
           alert("登陆失败");
-          this.name = "";
-          this.password = "";
         } else {
           alert("传参失败");
         }

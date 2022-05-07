@@ -58,11 +58,11 @@ export default {
     this.get_my_products();
     console.log("初始化页面")
     
-    if(this.type=="userallproducts"){
+    if(this.type=="user_all_products"){
       this.action="发布";
-    }else if(this.type=="mypurchase"){
+    }else if(this.type=="my_purchase"){
       this.action="买到";
-    }else if(this.type=="myfavorites"){
+    }else if(this.type=="my_favorites"){
       this.action="收藏";
     }
   },
@@ -73,10 +73,10 @@ export default {
       path+=this.type;
       console.log(path);
       var searchinfo = {
-        "user_name": GLOBAL.currentUser_name,
-        "source_id": GLOBAL.currentUser_ID,
+        "user_id": GLOBAL.currentUser_ID,
         "strategy_0": 0,
         "strategy_1": 1,
+        "category_id":0,
       };
       axios
       .post(path, JSON.stringify(searchinfo))
@@ -90,6 +90,21 @@ export default {
       });
     },
   },
+  watch :{
+        '$route': function (to, from) {
+          console.log(to);
+          this.type = this.$route.query.type
+          if(this.type=="user_all_products"){
+            this.action="发布";
+          }else if(this.type=="my_purchase"){
+            this.action="买到";
+          }else if(this.type=="my_favorites"){
+            this.action="收藏";
+          }
+          this.get_my_products();
+        }
+  },
+
 };
 </script>
 
