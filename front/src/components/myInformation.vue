@@ -62,6 +62,7 @@
 <script>
 import GLOBAL from '@/global/global'
 export default {
+  inject:["reload"],
   data(){
     return{
       userName:GLOBAL.currentUser_name,
@@ -80,7 +81,7 @@ export default {
       this.$router.replace('/createItem')
     },
     gotoMyPurchase(){
-      this.$router.replace('/myGoods')
+      this.$router.push({path:"/myGoods",query: {type:"my_purchase"}});
     },
     gotoGerenzhuye()
     {
@@ -93,9 +94,13 @@ export default {
       this.$router.replace('/putGoods')
     },
     gotoMyFavorite(){
-      console.log("goto my favorite");
-      this.$router.push({path:"myGoods",query:{type:"myfavorites"}});
+      this.$router.push({path:"/myGoods",query: {type:"my_favorites"}});
     }
+  },
+  watch :{
+        '$route': function (to, from) {
+          this.reload();
+        }
   },
 };
 </script>

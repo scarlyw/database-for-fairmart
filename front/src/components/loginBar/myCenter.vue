@@ -9,7 +9,7 @@
           mode="horizontal"
           @select="handleSelect"
         >
-          <el-menu-item index="1">我的消息</el-menu-item>
+          <el-menu-item index="1" @click="dialog_deposit_Visible=true">充值</el-menu-item>
           <el-submenu index="2">
             <template slot="title">我的商品</template>
             <el-menu-item index="2-1" @click="gotoMyGoods"
@@ -17,14 +17,8 @@
             >
             <el-menu-item index="2-2" @click="gotoMyPurchase">我拍下的</el-menu-item>
             <el-menu-item index="2-3" @click="gotoMyFavorite">我的收藏</el-menu-item>
-            <el-submenu index="2-4">
-              <template slot="title">这个菜单干什么好呢</template>
-              <el-menu-item index="2-4-1">选项1</el-menu-item>
-              <el-menu-item index="2-4-2">选项2</el-menu-item>
-              <el-menu-item index="2-4-3">选项3</el-menu-item>
-            </el-submenu>
           </el-submenu>
-          <el-menu-item index="3" @click="dialog_changevx_Visible=true">更改联系方式</el-menu-item>
+          <el-menu-item index="3" @click="dialog_changecontact_Visible=true">更改联系方式</el-menu-item>
           <el-menu-item index="4" style="margin=0px;"
             ><a target="_blank" @click="quit"
               >退出登录</a
@@ -34,16 +28,30 @@
       </span>
     </span>
     <el-dialog
-      :visible.sync="dialog_changevx_Visible"
+      :visible.sync="dialog_changecontact_Visible"
       width="50%"
       style="text-align: center"
       
     >
-      <span>请输入您的微信号</span>
-      <el-input v-model="myWeChat"></el-input>
+      <div>您当前的联系信息：{{currentContact}}</div>
+      <span>请输入您的联系方式信息</span>
+      <el-input v-model="myContact"></el-input>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialog_buying_Visible = false">取 消</el-button>
-        <el-button type="primary" @click="changeMyWX">确 定</el-button>
+        <el-button @click="dialog_changecontact_Visible = false">取 消</el-button>
+        <el-button type="primary" @click="changeContact">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      :visible.sync="dialog_deposit_Visible"
+      width="50%"
+      style="text-align: center"
+      
+    >
+      <span>请输入充值金额</span>
+      <el-input v-model="myDeposit"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialog_deposit_Visible = false">取 消</el-button>
+        <el-button type="primary" @click="deposit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -56,8 +64,11 @@ import Router from "../../router/index.js";
 export default {
   data() {
     return {
-      myWeChat:"",
-      dialog_changevx_Visible: false,
+      myContact:"",
+      dialog_changecontact_Visible: false,
+      currentContact:GLOBAL.contact_description,
+      dialog_deposit_Visible: false,
+      myDeposit:"",
     };
   },
 
@@ -69,7 +80,7 @@ export default {
 
   methods: {
     gotoMyGoods() {
-        Router.push({ path: '/myGoods', query: { type: "userallproducts" }});
+        Router.push({ path: '/myGoods', query: { type: "user_all_products" }});
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -78,49 +89,77 @@ export default {
         })
         .catch((_) => {});
     },
-    changeMyWX() {
-      if (this.myWeChat == "") {
-        alert("请输入内容");
-      }
-      var vx=this.myWeChat;
-      const  path="http://10.2.35.12:8080/changeWeChat";
-      var WeChat_info={
-        "user_id":GLOBAL.currentUser_ID,
-        "WeChat_id":vx,
-      }
-      console.log(WeChat_info);
-      var that=this;
-      axios
-					.post(path,JSON.stringify(WeChat_info))
-					.then(function(response){
-						var vx_result=response.data
-						var vx_success = vx_result["result"];
-						//alart(is_register_success)
-						console.log(vx_success);//注意返回格式
-						if(vx_success==="failed"){
-							alert("登记失败，请重试");
-						}else if(vx_success==="success"){
-              //that.dialog_changevx_Visible=false;
-              var alert_str="登记成功，您的微信为:"+vx;
-							alert(alert_str);
-              that.dialog_changevx_Visible=false;
-						}else{
-							alert("写个什么玩意？");
-						}
-					});
-    },
     gotoMyPurchase(){
-      console.log("goto my churse")
-      Router.push({path:"myGoods",query: {type:"mypurchase"}});
+      console.log("goto my churse");
+      Router.push({path:"/myGoods",query: {type:"my_purchase"}});
     },
     gotoMyFavorite(){
       console.log("goto my favorite");
-      Router.push({path:"myGoods",query: {type:"myfavorites"}});
+      Router.push({path:"/myGoods",query: {type:"my_favorites"}});
     },
     quit(){
       this.$router.go(0);
 
-    }
+    },
+    changeContact() {
+      if(GLOBAL.currentUser_ID == "") {
+        dialog_changecontact_Visible = false;
+        alert("请登录后再试");
+      }
+      const path = "http://localhost:8081/change_contact_info";
+      var that = this;
+      var Info = {
+        user_id: GLOBAL.currentUser_ID,
+        other_contact_info: this.myContact,
+      };
+      axios.post(path, JSON.stringify(Info)).then(function (response) {
+        console.log("accept");
+        var result = response.data;
+        var change_success = result["state"];
+        if (change_success == true) {
+          GLOBAL.contact_description = that.myContact;
+          that.currentContact = that.myContact;
+          that.dialog_changecontact_Visible = false;
+          that.myContact = "";
+        } else {
+          alert("修改失败，请重试");
+        }
+      });
+    },
+    deposit() {
+      var that = this;
+      const path = "http://localhost:8081/deposit";
+      if(GLOBAL.currentUser_ID == "") {
+        dialog_changecontact_Visible = false;
+        alert("请登录后再试");
+      }
+      var depositMoney = Number(this.myDeposit,10);
+      if(isNaN(depositMoney)) {
+        alert("请输入数字");
+        myDeposit = "";
+      }
+      else if(depositMoney <= 0) {
+        alert("请输入大于0的充值金额");
+        myDeposit = "";
+      }
+      var Info = {
+        user_id: GLOBAL.currentUser_ID,
+        money: this.myDeposit,
+      };
+      axios.post(path, JSON.stringify(Info)).then(function (response) {
+        console.log("accept");
+        var result = response.data;
+        var deposit_success = result["state"];
+        if (deposit_success == true) {
+          GLOBAL.money = Number(GLOBAL.money,10)+depositMoney;
+          that.dialog_deposit_Visible = false;
+          that.myDeposit = "";
+          Router.push("/");
+        } else {
+          alert("充值失败，请重试");
+        }
+      });
+    },
   },
 };
 </script>

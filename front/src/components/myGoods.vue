@@ -18,9 +18,9 @@ export default {
     data(){
         
         return{
-            goodsnum:3,
+            goodsnum:0,
             
-            displayLongData:[{'name':"FC31",'descript':"haisidai"},{'name':"FC31",'descript':"wudaiji"},{'name':"F22","descript":'niangniang'}],
+            displayLongData:[],
             
         }
     },
