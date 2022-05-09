@@ -32,6 +32,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db.init_app(app)
 
+product_list = ['product_id', 'category_id', 'user_id', 'product_name', 'price', 'photo_path', 'state', 'put_timestamp', 'product_description']
+order = {0 : 'product_id', 1 : 'price', 2 : 'category_id'}
+
 # to_dict
 # transform info into python dict
 # forbidden to take null inputs
@@ -82,17 +85,19 @@ def user_post_product():
 
         # url = '\static\img\\' + photo_picture_name
         url = '\static\img\\2022-4-2919-516-10.png'
-        product_new = Product(category_id = info["category_id"],
-                              user_id = info["user_id"], 
+        product_new = Product(category_id = int(info["category_id"]),
+                              user_id = int(info["user_id"]),
                               product_name = info["product_name"],
                               price = info["price"],
                               photo_path = url,
                               state = True,
                               put_timestamp = datetime.now(), 
                               product_description = info["product_description"])
+
         db.session.add(product_new)
         db.session.commit()
-        dict1 = to_dict(product_new)
+        # dict1 = to_dict(product_new)
+        dict1 = {}
         db.session.close()
         res = make_response(json.dumps(dict1))
         res.headers["Access-Control-Allow-Origin"] = '*'
@@ -217,6 +222,7 @@ def user_search_products():
             # with open(path_photo_picture_save, 'r') as f:
             #     photo = f.read()
             # item_modify["photo"] = photo
+            item_modify["put_timestamp"] = str(item_modify["put_timestamp"])
             search_result_1[i] = item_modify
 
         # print(search_result_1)
@@ -283,6 +289,7 @@ def user_all_products():
             # with open(path_photo_picture_save, 'r') as f:
             #     photo = f.read()
             # item_modify["photo"] = photo
+            item_modify["put_timestamp"] = str(item_modify["put_timestamp"])
             search_result_1[i] = item_modify
 
         res = make_response(json.dumps(search_result_1))
@@ -592,6 +599,7 @@ def product_info():
         dict_result["photo"] = photo
         print(type(photo))
         dict_result["result"] = "success"
+        dict_result["put_timestamp"] = str(dict_result["put_timestamp"])
         # print(dict_result)
         res = make_response(json.dumps(dict_result))
         res.headers["Access-Control-Allow-Origin"] = '*'
@@ -910,49 +918,58 @@ def add_favorite():
 @app.route('/my_favorites', methods=['GET', 'POST', 'OPTIONS'])
 def my_favorites():
     info = json.loads(request.get_data())
+    print(info)
     if request.method == 'GET':
         return
-
     elif request.method == 'POST':
         # strategy_first = 0, all products
-        # TODO(scarlyw) : 判定登录状态
         if info["user_id"] == 0:
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
-                                                     (select favorites.product_id from favorites where user_id = %d)' 
-                                                     % info["category_id"], info["user_id"])
+            sql = ('select * from product where category_id = %d and product_id in \
+                                                     (select favorites.product_id from favorites where user_id = %d) order by %s' 
+                                                     % (info["category_id"], info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
         else:
-            search_result = db.session.execute('select * from product where product_id in \
-                                                     (select favorites.product_id from favorites where user_id = %d)' 
-                                                     % info["user_id"])
+            sql = ('select * from product where product_id in \
+                                                     (select favorites.product_id from favorites where user_id = %d) order by %s' 
+                                                     % (info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
+
+        # print(list(db.session.description))
         search_result = list(search_result)
+        print(search_result)
+        search_result_1 = search_result
         # different sorting strategies
         # automatically present the product by id
-        if info["strategy_1"] == 0:
-            search_result_1 = search_result
+        # if info["strategy_1"] == 0:
+        #     search_result_1 = search_result
 
-        # sorted by price
-        elif info["strategy_1"] == 1:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_price)
+        # # sorted by price
+        # elif info["strategy_1"] == 1:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_price)
 
-        # sorted by category
-        elif info["strategy_1"] == 2:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_category)
+        # # sorted by category
+        # elif info["strategy_1"] == 2:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_category)
 
-        # change the type of list
+        # print(search_result_1)
+        # # change the type of list
         for i in range(len(search_result_1)):
             item_original = search_result_1[i]
-            item_modify = to_dict(item_original)
+            item_modify = dict(zip(product_list, list(item_original)))
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = "\static\img\\2022-4-2919-516-10.png"       
             path_photo_picture_save = basedir + path
             with open(path_photo_picture_save, 'r') as f:
                 photo = f.read()
             item_modify["photo"] = photo
+            item_modify["put_timestamp"] = str(item_modify["put_timestamp"])
             search_result_1[i] = item_modify
 
         res = make_response(json.dumps(search_result_1))
@@ -1009,49 +1026,58 @@ def delete_favorite():
 @app.route('/my_purchase', methods=['GET', 'POST', 'OPTIONS'])
 def my_purchase():
     info = json.loads(request.get_data())
+    print(info)
     if request.method == 'GET':
         return
-
     elif request.method == 'POST':
         # strategy_first = 0, all products
         if info["user_id"] == 0:
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
-                                                     (select history.product_id from history where user_purchaser_id = %d)' 
-                                                     % info["category_id"], info["user_id"])
+            sql = ('select * from product where category_id = %d and product_id in \
+                                                     (select history.product_id from history where user_purchaser_id = %d) order by %s' 
+                                                     % (info["category_id"], info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
         else:
-            search_result = db.session.execute('select * from product where product_id in \
-                                                     (select history.product_id from history where user_purchaser_id = %d)' 
-                                                     % info["user_id"])
+            sql = ('select * from product where product_id in \
+                                                     (select history.product_id from history where user_purchaser_id = %d) order by %s' 
+                                                     % (info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
 
+        # print(list(db.session.description))
         search_result = list(search_result)
+        print(search_result)
+        search_result_1 = search_result
         # different sorting strategies
         # automatically present the product by id
-        if info["strategy_1"] == 0:
-            search_result_1 = search_result
+        # if info["strategy_1"] == 0:
+        #     search_result_1 = search_result
 
-        # sorted by price
-        elif info["strategy_1"] == 1:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_price)
+        # # sorted by price
+        # elif info["strategy_1"] == 1:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_price)
 
-        # sorted by category
-        elif info["strategy_1"] == 2:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_category)
+        # # sorted by category
+        # elif info["strategy_1"] == 2:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_category)
 
-        # change the type of list
+        # print(search_result_1)
+        # # change the type of list
         for i in range(len(search_result_1)):
             item_original = search_result_1[i]
-            item_modify = to_dict(item_original)
+            item_modify = dict(zip(product_list, list(item_original)))
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = "\static\img\\2022-4-2919-516-10.png"       
             path_photo_picture_save = basedir + path
             with open(path_photo_picture_save, 'r') as f:
                 photo = f.read()
             item_modify["photo"] = photo
+            item_modify["put_timestamp"] = str(item_modify["put_timestamp"])
             search_result_1[i] = item_modify
 
         res = make_response(json.dumps(search_result_1))
@@ -1068,48 +1094,58 @@ def my_purchase():
 @app.route('/my_sold', methods=['GET', 'POST', 'OPTIONS'])
 def my_sold():
     info = json.loads(request.get_data())
+    print(info)
     if request.method == 'GET':
         return
-
     elif request.method == 'POST':
         # strategy_first = 0, all products
         if info["user_id"] == 0:
             return 
         # only want one category_
         if info["strategy_0"] == 1:
-            search_result = db.session.execute('select * from product where category_id = %d and product_id in \
-                                                     (select history.product_id from history where user_provider_id = %d)' 
-                                                     % info["category_id"], info["user_id"])
+            sql = ('select * from product where category_id = %d and product_id in \
+                                                     (select history.product_id from history where user_provider_id = %d) order by %s' 
+                                                     % (info["category_id"], info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
         else:
-            search_result = db.session.execute('select * from product where product_id in \
-                                                     (select history.product_id from history where user_provider_id = %d)' 
-                                                     % info["user_id"])
+            sql = ('select * from product where product_id in \
+                                                     (select history.product_id from history where user_provider_id = %d) order by %s' 
+                                                     % (info["user_id"], order[info["strategy_1"]]))
+            search_result = db.session.execute(sql)
+            print(sql)
+
+        # print(list(db.session.description))
         search_result = list(search_result)
+        print(search_result)
+        search_result_1 = search_result
         # different sorting strategies
         # automatically present the product by id
-        if info["strategy_1"] == 0:
-            search_result_1 = search_result
+        # if info["strategy_1"] == 0:
+        #     search_result_1 = search_result
 
-        # sorted by price
-        elif info["strategy_1"] == 1:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_price)
+        # # sorted by price
+        # elif info["strategy_1"] == 1:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_price)
 
-        # sorted by category
-        elif info["strategy_1"] == 2:
-            search_result_1 = search_result
-            search_result_1.sort(key = take_category)
+        # # sorted by category
+        # elif info["strategy_1"] == 2:
+        #     search_result_1 = search_result
+        #     search_result_1.sort(key = take_category)
 
-        # change the type of list
+        # print(search_result_1)
+        # # change the type of list
         for i in range(len(search_result_1)):
             item_original = search_result_1[i]
-            item_modify = to_dict(item_original)
+            item_modify = dict(zip(product_list, list(item_original)))
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = "\static\img\\2022-4-2919-516-10.png"       
             path_photo_picture_save = basedir + path
             with open(path_photo_picture_save, 'r') as f:
                 photo = f.read()
             item_modify["photo"] = photo
+            item_modify["put_timestamp"] = str(item_modify["put_timestamp"])
             search_result_1[i] = item_modify
 
         res = make_response(json.dumps(search_result_1))
