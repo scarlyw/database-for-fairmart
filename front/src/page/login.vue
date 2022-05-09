@@ -140,7 +140,7 @@ export default {
           GLOBAL.isLogined = true;
           GLOBAL.view = "myCenter";
           GLOBAL.isLogined = true;
-          GLOBAL.money = parseInt(login_result["account"]);
+          GLOBAL.money = parseFloat(login_result["account"]);
           GLOBAL.identity =login_result["identity"];
           console.log("global identity:",GLOBAL.identity);
           GLOBAL.email = login_result["email"];

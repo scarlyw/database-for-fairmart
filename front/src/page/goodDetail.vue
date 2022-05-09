@@ -481,7 +481,8 @@ export default {
               var alert_str="购买成功"
               that.dialog_buying_Visible=false;
 							alert(alert_str);
-              
+              GLOBAL.money = GLOBAL.money - parseFloat(that.price);
+              that.$router.push("/");
 						}else{
 							alert("买了个什么玩意？");
 						}

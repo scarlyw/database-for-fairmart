@@ -98,7 +98,7 @@ export default {
     }
   },
   watch :{
-        '$route': function (to, from) {
+        '$router': function (to, from) {
           this.reload();
         }
   },
