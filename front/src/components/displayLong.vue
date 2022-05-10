@@ -13,8 +13,8 @@
         </div>
         <div id="price_num">
           <div style="font-size:30px; width:300px">价格：{{local.price}}</div>
-          <div v-if="display_time">购买时间：{{local.time}}</div>
-          <div v-if="display_wechat">卖家微信:{{local.seller_wechat}}</div>
+          <!-- <div v-if="display_time">购买时间：{{local.time}}</div>
+          <div v-if="display_wechat">卖家微信:{{local.seller_wechat}}</div> -->
         </div>
         <div id="operation">
           <div @click="showDetails" v-show="display_detail">查看商品信息</div>
@@ -49,7 +49,7 @@ export default {
   data(){
     return{
       //product_name:oneItemData.name,
-      //product_description:this.oneItemData.descript,
+      description:this.oneItemData.product_description,
       local:this.oneItemData,
       dialog_delete_Visible: false,
       getType:this.oneItemType,
@@ -76,7 +76,6 @@ export default {
     selecttoHide(){
       if(this.getType=="mypurchase"){
         this.display_delete=false;
-        this.display_wechat=true;
 
       }else if(this.getType=="userallproducts"){
         this.display_time=false;
